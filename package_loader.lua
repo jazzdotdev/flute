@@ -34,7 +34,7 @@ for k, v in pairs(fs.directory_list(packages_path)) do
     for _, file_name in ipairs(rule_files) do
         if file_name ~= "lua_files/" then
             local rule_lua_path = "tmp-lua/" .. file_name
-            local rule_path = packages_path .. package_name .. "/rules/" .. file_name
+            local rule_path = packages_path .. "/" .. package_name .. "/rules/" .. file_name
             print("[DEBUG] interpretating " .. rule_path)
 
             fs.copy(rule_path, rule_lua_path)
@@ -78,7 +78,7 @@ for k, v in pairs (fs.directory_list(packages_path)) do
     -- create events
     
     for i=1, event_count do
-        events[events_strings[i]] = luvent.newEvent()
+        _G.events[events_strings[i]] = luvent.newEvent()
     end
     
     -- read disabled actions
@@ -107,71 +107,68 @@ for k, v in pairs (fs.directory_list(packages_path)) do
     -- actions loader
 
     print("Event list")
-    for k, v in pairs(events) do print("", k, v) end
+    for k, v in pairs(_G.events) do print("", k, v) end
     
     local action_files = fs.get_all_files_in(v .. "actions/")
     for _, file_name in ipairs(action_files) do
         print("[DEBUG] interpretating file " .. file_name)
-        local action_file = assert(io.open(packages_path .. package_name .. "/actions/" .. file_name, "r")) -- open yaml / pseudo lua action ifle
+        local action_file = assert(io.open(packages_path .. "/" .. package_name .. "/actions/" .. file_name, "r")) -- open yaml / pseudo lua action ifle
         local action_yaml = ""
         local line_num = 0
 
-        if file_name ~= "lua_actions/" then
-            for line in io.lines(packages_path .. package_name .. "/actions/" .. file_name) do
-                line_num = line_num + 1
-                action_yaml = action_yaml .. line .. "\n" -- get only yaml lines
-                if line_num == 2 then break end
-            end
-            
-            action_yaml_table = yaml.load(action_yaml) -- decode yaml to lua table
+        for line in io.lines(packages_path .. "/" .. package_name .. "/actions/" .. file_name) do
+            line_num = line_num + 1        
+            action_yaml = action_yaml .. line .. "\n" -- get only yaml lines
+            if line_num == 2 then break end
+        end
+        action_yaml_table = yaml.load(action_yaml) -- decode yaml to lua table
+        local action_lua_file = assert(io.open("tmp-lua/" .. file_name, "w+")) -- w+ to override old files
+        action_lua_file:write("local event = { \"" .. action_yaml_table.event[1] .. "\"") -- put values from yaml in lua form
 
-            local action_lua_file = assert(io.open("tmp-lua/" .. file_name, "w+")) -- w+ to override old files
-            action_lua_file:write("local event = { \"" .. action_yaml_table.event[1] .. "\"") -- put values from yaml in lua form
-
-            for _, yaml_event in ipairs(action_yaml_table.event) do
-                if yaml_event ~= action_yaml_table.event[1] then 
-                    action_lua_file:write(', "' .. yaml_event .. '"') -- put all events to 'local event = { }'
-                end
-            end
-
-            action_lua_file:write(" }")
-            action_lua_file:write("\nlocal priority = " .. action_yaml_table.priority .. " \n")
-            action_lua_file:write("local function action (req)\n") -- function wrapper
-
-            line_num = 0
-
-            for line in io.lines(packages_path .. package_name .. "/actions/" .. file_name) do
-                line_num = line_num + 1
-                if line_num > 2 then
-                    action_lua_file:write(line .. "\n")
-                end
-            end
-            
-            action_lua_file:write("\nend\nreturn{\n\tevent = event,\n\taction = action,\n\tpriority = priority\n}") -- ending return
-            action_lua_file:close()
-
-
-            local action_require_name = "tmp-lua." .. string.sub( file_name, 0, string.len( file_name ) - 4 )
-            print(action_require_name)
-            local action_require = require(action_require_name)
-            
-            for k, v in pairs(action_require.event) do
-                local action = events[v]:addAction(
-                    function(req)
-                        possibleResponse = action_require.action(req)
-                        if possibleResponse ~= nil then
-                            if possibleResponse.body ~= nil then
-                                response = possibleResponse
-                            end
-                        end
-                    end
-                )
-                events[v]:setActionPriority(action, action_require.priority)
-                if isDisabled(file_name) then
-                    events[v]:disableAction(action)
-                end
+        for _, yaml_event in ipairs(action_yaml_table.event) do
+            if yaml_event ~= action_yaml_table.event[1] then 
+                action_lua_file:write(', "' .. yaml_event .. '"') -- put all events to 'local event = { }'
             end
         end
+
+        action_lua_file:write(" }")
+        action_lua_file:write("\nlocal priority = " .. action_yaml_table.priority .. " \n")
+        action_lua_file:write("local function action (req)\n") -- function wrapper
+
+        line_num = 0
+
+        for line in io.lines(packages_path .. "/" .. package_name .. "/actions/" .. file_name) do
+            line_num = line_num + 1
+            if line_num > 2 then
+                action_lua_file:write(line .. "\n")
+            end
+        end
+        
+        action_lua_file:write("\nend\nreturn{\n\tevent = event,\n\taction = action,\n\tpriority = priority\n}") -- ending return
+        action_lua_file:close()
+
+
+        local action_require_name = "tmp-lua." .. string.sub( file_name, 0, string.len( file_name ) - 4 )
+        print(action_require_name)
+        local action_require = require(action_require_name)
+        
+        for k, v in pairs(action_require.event) do
+            local action = _G.events[v]:addAction(
+                function(req)
+                    possibleResponse = action_require.action(req)
+                    if possibleResponse ~= nil then
+                        if possibleResponse.body ~= nil then
+                            _G.torchbear_response = possibleResponse
+                        end
+                    end
+                end
+            )
+            _G.events[v]:setActionPriority(action, action_require.priority)
+            if isDisabled(file_name) then
+                _G.events[v]:disableAction(action)
+            end
+        end
+        
     end
 end
 
@@ -187,11 +184,10 @@ for k, v in pairs(fs.directory_list(packages_path)) do
             local rule_require_name = "tmp-lua." .. string.sub(file_name, 0, string.len( file_name ) - 4)
             local rule_require = require(rule_require_name)
             print("[rule loading] " .. rule_require_name)
-            table.insert(rules, rule_require)
+            table.insert(_G.rules, rule_require)
         end
     end
 
 end
 --
-
 
