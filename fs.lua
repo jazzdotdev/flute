@@ -41,8 +41,33 @@ local function directory_list(directory)
     return t
 end
 
+local function copy(src_path, dest_path)
+    local src_file = assert(io.open(src_path, "r"))
+    local dest_file = assert(io.open(dest_path, "w+"))
+
+    dest_file:write(src_file:read("*all"))
+
+    src_file:close()
+    dest_file:close()
+end
+
+local function append_to_start(file_path, to_append)
+    local file = assert(io.open(file_path, "r"))
+    local file_content = file:read("*all")
+    file:close()
+
+    file = assert(io.open(file_path, "w"))
+    file:write(to_append)
+    file:write("\n")
+    file:write(file_content)
+
+    file:close()
+end
+
 return {
     read_file = read_file,
     get_all_files_in = get_all_files_in,
-    directory_list = directory_list
+    directory_list = directory_list,
+    copy = copy,
+    append_to_start = append_to_start
 }
