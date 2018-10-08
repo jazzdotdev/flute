@@ -34,7 +34,7 @@ function string.expand (s, ...)
           if n then v = args[n] end
         end
         if not v then
-          v, err = loadstring("return "..code) if not v then error(err) end
+          v, err = load("return tostring("..code..")") if not v then error(err) end
           v = v()
         end
         if v == nil then v = "" end
