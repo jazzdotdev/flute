@@ -2,7 +2,7 @@ local uuid_saved = 0
 
 function generate_uuid()
     uuid_saved = uuid.v4()
-    print("[DEBUG] UUID generated: " .. uuid_saved)
+    log.debug("UUID generated: " .. uuid_saved)
 end
 
 local function uuid_return()
@@ -23,7 +23,7 @@ local function print_req_info(req)
 
     message = message .. "\nRequest body:\n" .. req.body_raw
 
-    print(message)
+    log.debug(message)
 end
 
 local function print_req_info_return(req)

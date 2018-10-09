@@ -52,4 +52,4 @@ end
 
 _G.expand = string.expand
 
-print("Hello Torchbear!")
+log.info("torchbear-libs loaded")

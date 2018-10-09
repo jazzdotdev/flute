@@ -16,6 +16,14 @@ local debug = require "debug"
 local luvent = require "Luvent"
 local fs = require "fs"
 
+local req = ctx.msg
+req.path_segments = req.path:split("/")
+
+log.debug("path segments:")
+for k, v in pairs(req.path_segments) do
+    log.debug(k, v)
+end
+
 _G.rules = {} -- rules table to store them from all packages
 _G.events = { } -- events table
 local packages_path = "packages" -- directory where packages are stored
@@ -35,14 +43,15 @@ for k, v in pairs(fs.directory_list(packages_path)) do
         if file_name ~= "lua_files/" then
             local rule_lua_path = "tmp-lua/" .. file_name
             local rule_path = packages_path .. "/" .. package_name .. "/rules/" .. file_name
-            print("[DEBUG] interpretating " .. rule_path)
+            log.debug("interpretating " .. rule_path)
 
             fs.copy(rule_path, rule_lua_path)
             local lua_rule = assert(io.open(rule_lua_path, "a"))
+            lua_rule:write("\n\tlog.trace('rule " .. file_name .. " evaluated succesfully')")
             lua_rule:write("\nend\nreturn{\n\trule = rule\n}") -- bottom rule function wrapper
             lua_rule:close()
 
-            fs.append_to_start(rule_lua_path, "local function rule(req, events)") -- upper rule function wrapper
+            fs.append_to_start(rule_lua_path, "local function rule(req, events)\n\tlog.trace('rule " .. file_name .. " starting to evaluate')") -- upper rule function wrapper
 
         end
     end
@@ -72,13 +81,17 @@ for k, v in pairs (fs.directory_list(packages_path)) do
     
     for _ in pairs(events_strings) do
         event_count = event_count + 1
-        print("counting")
     end
     
     -- create events
     
     for i=1, event_count do
-        _G.events[events_strings[i]] = luvent.newEvent()
+        local name = events_strings[i]
+        local event = luvent.newEvent()
+        event:addAction(function ()
+            log.debug("event " .. name .. " triggered")
+        end)
+        _G.events[name] = event
     end
     
     -- read disabled actions
@@ -96,7 +109,6 @@ for k, v in pairs (fs.directory_list(packages_path)) do
     ---
     function isDisabled(action_file_name)
         for k, v in pairs(disabled_actions) do
-            print (v)
             if action_file_name == v then 
                 return true 
             end
@@ -105,13 +117,10 @@ for k, v in pairs (fs.directory_list(packages_path)) do
         return false
     end
     -- actions loader
-
-    print("Event list")
-    for k, v in pairs(_G.events) do print("", k, v) end
     
     local action_files = fs.get_all_files_in(v .. "actions/")
     for _, file_name in ipairs(action_files) do
-        print("[DEBUG] interpretating file " .. file_name)
+        log.debug("interpretating file " .. file_name)
         local action_file = assert(io.open(packages_path .. "/" .. package_name .. "/actions/" .. file_name, "r")) -- open yaml / pseudo lua action ifle
         local action_yaml = ""
         local line_num = 0
@@ -143,24 +152,25 @@ for k, v in pairs (fs.directory_list(packages_path)) do
                 action_lua_file:write(line .. "\n")
             end
         end
-        
+
         action_lua_file:write("\nend\nreturn{\n\tevent = event,\n\taction = action,\n\tpriority = priority\n}") -- ending return
         action_lua_file:close()
 
 
         local action_require_name = "tmp-lua." .. string.sub( file_name, 0, string.len( file_name ) - 4 )
-        print(action_require_name)
         local action_require = require(action_require_name)
         
         for k, v in pairs(action_require.event) do
             local action = _G.events[v]:addAction(
                 function(req)
+                    log.debug("action " .. file_name .. " about to run")
                     possibleResponse = action_require.action(req)
                     if possibleResponse ~= nil then
                         if possibleResponse.body ~= nil then
                             _G.torchbear_response = possibleResponse
                         end
                     end
+                    log.debug("action " .. file_name .. " ran succesfully")
                 end
             )
             _G.events[v]:setActionPriority(action, action_require.priority)
@@ -183,7 +193,7 @@ for k, v in pairs(fs.directory_list(packages_path)) do
 
             local rule_require_name = "tmp-lua." .. string.sub(file_name, 0, string.len( file_name ) - 4)
             local rule_require = require(rule_require_name)
-            print("[rule loading] " .. rule_require_name)
+            log.debug("[rule loading] " .. rule_require_name)
             table.insert(_G.rules, rule_require)
         end
     end
