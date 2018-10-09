@@ -15,6 +15,10 @@ local utils = require "utils"
 local debug = require "debug"
 local luvent = require "Luvent"
 local fs = require "fs"
+local theme_loader = require "theme_loader"
+
+theme_loader.load_themes("themes", "fixed-sidebar")
+
 
 _G.rules = {} -- rules table to store them from all packages
 _G.events = { } -- events table
