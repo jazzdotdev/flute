@@ -1,11 +1,3 @@
-
-_G.utils = require "utils"
-_G.luvent = require "Luvent"
-_G.fs = require "fs"
-
-require "table_ext"
-require "underscore_alias"
-
 function string:split(sep)
     local sep, fields = sep or ":", {}
     local pattern = string.format("([^%s]+)", sep)
@@ -51,5 +43,3 @@ function string.expand (s, ...)
 end
 
 _G.expand = string.expand
-
-log.info("torchbear-libs loaded")

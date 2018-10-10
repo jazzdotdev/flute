@@ -25,7 +25,8 @@ local packages_path_modules = packages_path:split( "/" )
 local packages_path_length = #packages_path_modules
 package.path = package.path..";./packages/?.lua" -- what is sense of this line? // Aleksander Wlodarczyk
 --
-
+--
+-- Generating uuid to match the response with request
 local req_process_event = luvent.newEvent()
 events["reqProcess"] = req_process_event
 events["resProcess"] = luvent.newEvent()
@@ -45,7 +46,7 @@ for k, v in pairs(fs.directory_list(packages_path)) do
         if file_name ~= "lua_files/" then
             local rule_lua_path = "tmp-lua/" .. file_name
             local rule_path = packages_path .. "/" .. package_name .. "/rules/" .. file_name
-            log.debug("interpretating " .. rule_path)
+            log.debug("[patch] rule " .. rule_path)
 
             fs.copy(rule_path, rule_lua_path)
             local lua_rule = assert(io.open(rule_lua_path, "a"))
@@ -125,7 +126,7 @@ for k, v in pairs (fs.directory_list(packages_path)) do
     
     local action_files = fs.get_all_files_in(v .. "actions/")
     for _, file_name in ipairs(action_files) do
-        log.debug("interpretating file " .. file_name)
+        log.debug("[patch] action " .. file_name)
         local action_file = assert(io.open(packages_path .. "/" .. package_name .. "/actions/" .. file_name, "r")) -- open yaml / pseudo lua action ifle
         local action_yaml = ""
         local line_num = 0
@@ -201,7 +202,7 @@ for k, v in pairs(fs.directory_list(packages_path)) do
 
             local rule_require_name = "tmp-lua." .. string.sub(file_name, 0, string.len( file_name ) - 4)
             local rule_require = require(rule_require_name)
-            log.debug("[rule loading] " .. rule_require_name)
+            log.debug("[load] rule " .. rule_require_name)
             table.insert(_G.rules, rule_require)
         end
     end
