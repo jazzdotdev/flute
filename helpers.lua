@@ -19,7 +19,7 @@ local function split_document(document_text, id)
         uuid = id,
         type = yaml.type,
         title = yaml.title,
-        body = html_body,
+        body = body,
         created = yaml.created or "",
         updated = yaml.updated or "",
     }

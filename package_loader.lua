@@ -16,13 +16,6 @@ local debug = require "debug"
 local luvent = require "Luvent"
 local fs = require "fs"
 
-local req = ctx.msg
-req.path_segments = req.path:split("/")
-
-log.debug("path segments:")
-for k, v in pairs(req.path_segments) do
-    log.debug(k, v)
-end
 
 _G.rules = {} -- rules table to store them from all packages
 _G.events = { } -- events table
@@ -32,6 +25,15 @@ local packages_path_modules = packages_path:split( "/" )
 local packages_path_length = #packages_path_modules
 package.path = package.path..";./packages/?.lua" -- what is sense of this line? // Aleksander Wlodarczyk
 --
+
+local req_process_event = luvent.newEvent()
+events["reqProcess"] = req_process_event
+events["resProcess"] = luvent.newEvent()
+req_process_event:addAction(function ()
+    local req = ctx.msg
+    req.path_segments = req.path:split("/")
+    debug.generate_uuid()
+end)
 
 -- rule interpretter
 for k, v in pairs(fs.directory_list(packages_path)) do
@@ -87,11 +89,14 @@ for k, v in pairs (fs.directory_list(packages_path)) do
     
     for i=1, event_count do
         local name = events_strings[i]
-        local event = luvent.newEvent()
+        local event = _G.events[name]
+        if not event then
+            event = luvent.newEvent()
+            _G.events[name] = event
+        end
         event:addAction(function ()
             log.debug("event " .. name .. " triggered")
         end)
-        _G.events[name] = event
     end
     
     -- read disabled actions
@@ -168,6 +173,9 @@ for k, v in pairs (fs.directory_list(packages_path)) do
                     if possibleResponse ~= nil then
                         if possibleResponse.body ~= nil then
                             _G.torchbear_response = possibleResponse
+                            if events["resProcess"] then
+                                events["resProcess"]:trigger()
+                            end
                         end
                     end
                     log.debug("action " .. file_name .. " ran succesfully")
