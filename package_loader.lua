@@ -27,12 +27,12 @@ package.path = package.path..";./packages/?.lua" -- what is sense of this line? 
 --
 --
 -- Generating uuid to match the response with request
-local req_process_event = luvent.newEvent()
-events["reqProcess"] = req_process_event
+local request_process_event = luvent.newEvent()
+events["reqProcess"] = request_process_event
 events["resProcess"] = luvent.newEvent()
-req_process_event:addAction(function ()
-    local req = ctx.msg
-    req.path_segments = req.path:split("/")
+request_process_event:addAction(function ()
+    local request = ctx.msg
+    request.path_segments = request.path:split("/")
     debug.generate_uuid()
 end)
 
@@ -48,13 +48,20 @@ for k, v in pairs(fs.directory_list(packages_path)) do
             local rule_path = packages_path .. "/" .. package_name .. "/rules/" .. file_name
             log.debug("[patch] rule " .. rule_path)
 
-            fs.copy(rule_path, rule_lua_path)
-            local lua_rule = assert(io.open(rule_lua_path, "a"))
-            lua_rule:write("\n\tlog.trace('rule " .. file_name .. " evaluated succesfully')")
+            --fs.copy(rule_path, rule_lua_path)
+            local lua_rule = assert(io.open(rule_lua_path, "w+"))
+
+            lua_rule:write("local function rule(request, events)\n\tlog.debug('rule " .. file_name .. " starting to evaluate')")
+            
+            for line in io.lines(rule_path) do
+                lua_rule:write("\n\t" .. line)
+            end
+
+            lua_rule:write("\n\tlog.debug('rule " .. file_name .. " evaluated succesfully')")
             lua_rule:write("\nend\nreturn{\n\trule = rule\n}") -- bottom rule function wrapper
             lua_rule:close()
 
-            fs.append_to_start(rule_lua_path, "local function rule(req, events)\n\tlog.trace('rule " .. file_name .. " starting to evaluate')") -- upper rule function wrapper
+            --fs.append_to_start(rule_lua_path, "local function rule(req, events)\n\tlog.trace('rule " .. file_name .. " starting to evaluate')") -- upper rule function wrapper
 
         end
     end
@@ -147,7 +154,7 @@ for k, v in pairs (fs.directory_list(packages_path)) do
         end
 
         action_lua_file:write(" }")
-        action_lua_file:write("\nlocal priority = " .. action_yaml_table.priority .. " \n")
+        action_lua_file:write("\nlocal priority = " .. action_yaml_table.priority .. " \n\n")
         action_lua_file:write("local function action (req)\n") -- function wrapper
 
         line_num = 0
@@ -155,11 +162,11 @@ for k, v in pairs (fs.directory_list(packages_path)) do
         for line in io.lines(packages_path .. "/" .. package_name .. "/actions/" .. file_name) do
             line_num = line_num + 1
             if line_num > 2 then
-                action_lua_file:write(line .. "\n")
+                action_lua_file:write(line .. "\n\t")
             end
         end
 
-        action_lua_file:write("\nend\nreturn{\n\tevent = event,\n\taction = action,\n\tpriority = priority\n}") -- ending return
+        action_lua_file:write("\nend\n\nreturn{\n\tevent = event,\n\taction = action,\n\tpriority = priority\n}") -- ending return
         action_lua_file:close()
 
 
@@ -173,7 +180,7 @@ for k, v in pairs (fs.directory_list(packages_path)) do
                     possibleResponse = action_require.action(req)
                     if possibleResponse ~= nil then
                         if possibleResponse.body ~= nil then
-                            _G.torchbear_response = possibleResponse
+                            _G.returned_response = possibleResponse
                             if events["resProcess"] then
                                 events["resProcess"]:trigger()
                             end
