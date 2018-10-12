@@ -28,7 +28,7 @@ package.path = package.path..";./packages/?.lua" -- what is sense of this line? 
 --
 -- Generating uuid to match the response with request
 local request_process_event = luvent.newEvent()
-events["reqProcess"] = request_process_event
+events["requestProcess"] = request_process_event
 events["resProcess"] = luvent.newEvent()
 request_process_event:addAction(function ()
     local request = ctx.msg
@@ -155,7 +155,7 @@ for k, v in pairs (fs.directory_list(packages_path)) do
 
         action_lua_file:write(" }")
         action_lua_file:write("\nlocal priority = " .. action_yaml_table.priority .. " \n\n")
-        action_lua_file:write("local function action (req)\n") -- function wrapper
+        action_lua_file:write("local function action(request)\n") -- function wrapper
 
         line_num = 0
 
