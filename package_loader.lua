@@ -30,11 +30,13 @@ package.path = package.path..";./packages/?.lua" -- what is sense of this line? 
 local req_process_event = luvent.newEvent()
 events["reqProcess"] = req_process_event
 events["resProcess"] = luvent.newEvent()
-req_process_event:addAction(function ()
+function req_process_action ()
     local req = ctx.msg
     req.path_segments = req.path:split("/")
     debug.generate_uuid()
-end)
+end
+req_process_event:addAction(req_process_action)
+req_process_event:setActionPriority(req_process_action, 100)
 
 -- rule interpretter
 for k, v in pairs(fs.directory_list(packages_path)) do

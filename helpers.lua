@@ -1,11 +1,11 @@
 local function split_yaml_header (document_text)
-    local yaml_text, body = document_text:match("(.-)\n%.%.%.*\n(.*)")
+    local yaml_text, body = document_text:match("(.-)\n%.%.%.*\n?(.*)")
     local yaml = yaml.load(yaml_text)
     return yaml, body
 end
 
 local function split_document(document_text, id)
-    local yaml_text, body = document_text:match("(.-)\n%.%.%.*\n(.*)")
+    local yaml_text, body = document_text:match("(.-)\n%.%.%.*\n?(.*)")
     local yaml = yaml.load(yaml_text)
     local processed_body = body:gsub("\n", "\n")
     local html_body = markdown_to_html(processed_body, {safe = true})
