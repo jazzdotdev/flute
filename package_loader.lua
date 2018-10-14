@@ -15,7 +15,8 @@ local utils = require "utils"
 local debug = require "debug"
 local luvent = require "Luvent"
 local fs = require "fs"
-
+local log = require "log"
+local ansicolors = require 'ansicolors'
 
 _G.rules = {} -- rules table to store them from all packages
 _G.events = { } -- events table
@@ -23,16 +24,19 @@ local packages_path = "packages" -- directory where packages are stored
 -- Splitting packages path to easier determine the name of current package later
 local packages_path_modules = packages_path:split( "/" )
 local packages_path_length = #packages_path_modules
-package.path = package.path..";./packages/?.lua" -- what is sense of this line? // Aleksander Wlodarczyk
+-- Adds the packages into the lua search path, so that a package's content
+-- can be required using it's name as if it was a lua module, ej:
+-- require "lighttouch-libs.actions.create_key"
+package.path = package.path..";./packages/?.lua"
 --
 --
 -- Generating uuid to match the response with request
-local req_process_event = luvent.newEvent()
-events["reqProcess"] = req_process_event
+local request_process_event = luvent.newEvent()
+events["requestProcess"] = request_process_event
 events["resProcess"] = luvent.newEvent()
 function req_process_action ()
-    local req = ctx.msg
-    req.path_segments = req.path:split("/")
+    local request = ctx.msg
+    request.path_segments = request.path:split("/")
     debug.generate_uuid()
 end
 req_process_event:addAction(req_process_action)
@@ -48,15 +52,23 @@ for k, v in pairs(fs.directory_list(packages_path)) do
         if file_name ~= "lua_files/" then
             local rule_lua_path = "tmp-lua/" .. file_name
             local rule_path = packages_path .. "/" .. package_name .. "/rules/" .. file_name
-            log.debug("[patch] rule " .. rule_path)
+            log.trace("[Rule] Patching " .. ansicolors('%{underline}' .. file_name))
 
-            fs.copy(rule_path, rule_lua_path)
-            local lua_rule = assert(io.open(rule_lua_path, "a"))
-            lua_rule:write("\n\tlog.trace('rule " .. file_name .. " evaluated succesfully')")
+            --fs.copy(rule_path, rule_lua_path)
+            local lua_rule = assert(io.open(rule_lua_path, "w+"))
+            
+            lua_rule:write("local log = require \"log\"\n")
+            lua_rule:write("local function rule(request, events)\n\tlog.debug('rule " .. file_name .. " starting to evaluate')")
+            
+            for line in io.lines(rule_path) do
+                lua_rule:write("\n\t" .. line)
+            end
+
+            lua_rule:write("\n\tlog.debug('[Rule] " .. ansicolors('%{underline}' .. file_name).. " evaluated succesfully')")
             lua_rule:write("\nend\nreturn{\n\trule = rule\n}") -- bottom rule function wrapper
             lua_rule:close()
 
-            fs.append_to_start(rule_lua_path, "local function rule(req, events)\n\tlog.trace('rule " .. file_name .. " starting to evaluate')") -- upper rule function wrapper
+            --fs.append_to_start(rule_lua_path, "local function rule(req, events)\n\tlog.trace('rule " .. file_name .. " starting to evaluate')") -- upper rule function wrapper
 
         end
     end
@@ -98,7 +110,7 @@ for k, v in pairs (fs.directory_list(packages_path)) do
             _G.events[name] = event
         end
         event:addAction(function ()
-            log.debug("event " .. name .. " triggered")
+            log.debug("[Event] " .. ansicolors('%{underline}' .. name) .. " triggered")
         end)
     end
     
@@ -128,7 +140,7 @@ for k, v in pairs (fs.directory_list(packages_path)) do
     
     local action_files = fs.get_all_files_in(v .. "actions/")
     for _, file_name in ipairs(action_files) do
-        log.debug("[patch] action " .. file_name)
+        log.trace("[Action] Patching " .. ansicolors('%{underline}' .. file_name))
         local action_file = assert(io.open(packages_path .. "/" .. package_name .. "/actions/" .. file_name, "r")) -- open yaml / pseudo lua action ifle
         local action_yaml = ""
         local line_num = 0
@@ -149,21 +161,21 @@ for k, v in pairs (fs.directory_list(packages_path)) do
         end
 
         action_lua_file:write(" }")
-        action_lua_file:write("\nlocal priority = " .. action_yaml_table.priority .. " \n")
-        action_lua_file:write("local function action (req)\n") -- function wrapper
+        action_lua_file:write("\nlocal priority = " .. action_yaml_table.priority .. " \n\n")
+        action_lua_file:write("local log = require \"log\"\n")
+        action_lua_file:write("local function action(request)\n") -- function wrapper
 
         line_num = 0
 
         for line in io.lines(packages_path .. "/" .. package_name .. "/actions/" .. file_name) do
             line_num = line_num + 1
             if line_num > 2 then
-                action_lua_file:write(line .. "\n")
+                action_lua_file:write(line .. "\n\t")
             end
         end
 
-        action_lua_file:write("\nend\nreturn{\n\tevent = event,\n\taction = action,\n\tpriority = priority\n}") -- ending return
+        action_lua_file:write("\nend\n\nreturn{\n\tevent = event,\n\taction = action,\n\tpriority = priority\n}") -- ending return
         action_lua_file:close()
-
 
         local action_require_name = "tmp-lua." .. string.sub( file_name, 0, string.len( file_name ) - 4 )
         local action_require = require(action_require_name)
@@ -171,17 +183,17 @@ for k, v in pairs (fs.directory_list(packages_path)) do
         for k, v in pairs(action_require.event) do
             local action = _G.events[v]:addAction(
                 function(req)
-                    log.debug("action " .. file_name .. " about to run")
+                    log.debug("[Action] " .. ansicolors('%{underline}' .. file_name) .. " is about to run")
                     possibleResponse = action_require.action(req)
                     if possibleResponse ~= nil then
                         if possibleResponse.body ~= nil then
-                            _G.torchbear_response = possibleResponse
+                            _G.returned_response = possibleResponse
                             if events["resProcess"] then
                                 events["resProcess"]:trigger()
                             end
                         end
                     end
-                    log.debug("action " .. file_name .. " ran succesfully")
+                    log.debug("[Action] " .. ansicolors('%{underline}' .. file_name) .. " ran succesfully")
                 end
             )
             _G.events[v]:setActionPriority(action, action_require.priority)
@@ -204,7 +216,7 @@ for k, v in pairs(fs.directory_list(packages_path)) do
 
             local rule_require_name = "tmp-lua." .. string.sub(file_name, 0, string.len( file_name ) - 4)
             local rule_require = require(rule_require_name)
-            log.debug("[load] rule " .. rule_require_name)
+            log.debug("[Rule] Loading " .. ansicolors('%{underline}' .. rule_require_name))
             table.insert(_G.rules, rule_require)
         end
     end
