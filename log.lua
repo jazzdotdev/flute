@@ -13,8 +13,6 @@ log.usecolor = true
 log.outfile = nil
 log.level = "trace"
 
-local debug = require("debug")
-
 local modes = { -- \27[30m is for black text \27[48;5;numberm are for background according to this site http://www.lihaoyi.com/post/BuildyourownCommandLinewithANSIescapecodes.html
   { name = "trace", color = "\27[30m\27[48;5;255m", },
   { name = "debug", color = "\27[30m\27[48;5;27m", },

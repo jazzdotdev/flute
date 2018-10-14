@@ -51,7 +51,8 @@ for k, v in pairs(fs.directory_list(packages_path)) do
 
             --fs.copy(rule_path, rule_lua_path)
             local lua_rule = assert(io.open(rule_lua_path, "w+"))
-
+            
+            lua_rule:write("local log = require \"log\"\n")
             lua_rule:write("local function rule(request, events)\n\tlog.debug('rule " .. file_name .. " starting to evaluate')")
             
             for line in io.lines(rule_path) do
@@ -156,6 +157,7 @@ for k, v in pairs (fs.directory_list(packages_path)) do
 
         action_lua_file:write(" }")
         action_lua_file:write("\nlocal priority = " .. action_yaml_table.priority .. " \n\n")
+        action_lua_file:write("local log = require \"log\"\n")
         action_lua_file:write("local function action(request)\n") -- function wrapper
 
         line_num = 0

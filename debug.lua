@@ -1,8 +1,10 @@
 local uuid_saved = 0
 
+local log = require "log" 
+
 function generate_uuid()
     uuid_saved = uuid.v4()
-    log.debug("UUID generated: " .. uuid_saved)
+    log.trace("UUID generated: " .. uuid_saved)
 end
 
 local function uuid_return()
