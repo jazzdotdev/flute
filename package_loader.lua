@@ -170,8 +170,9 @@ for k, v in pairs (fs.directory_list(packages_path)) do
         action_lua_file:close()
 
         local loglua = require "log"
+        local ansicolors = require 'ansicolors'
 
-        loglua.error("Test of log.lua")
+        loglua.error("Test of log.lua" .. ansicolors('%{underline} and underlines'))
         loglua.trace("Test of log.lua")
         loglua.info("Test of log.lua")
         loglua.fatal("Test of log.lua")
