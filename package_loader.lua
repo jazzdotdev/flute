@@ -15,7 +15,8 @@ local utils = require "utils"
 local debug = require "debug"
 local luvent = require "Luvent"
 local fs = require "fs"
-
+local log = require "log"
+local ansicolors = require 'ansicolors'
 
 _G.rules = {} -- rules table to store them from all packages
 _G.events = { } -- events table
@@ -46,7 +47,7 @@ for k, v in pairs(fs.directory_list(packages_path)) do
         if file_name ~= "lua_files/" then
             local rule_lua_path = "tmp-lua/" .. file_name
             local rule_path = packages_path .. "/" .. package_name .. "/rules/" .. file_name
-            log.debug("[patch] rule " .. rule_path)
+            log.trace("[Rule] Patching " .. ansicolors('%{underline}' .. file_name))
 
             --fs.copy(rule_path, rule_lua_path)
             local lua_rule = assert(io.open(rule_lua_path, "w+"))
@@ -57,7 +58,7 @@ for k, v in pairs(fs.directory_list(packages_path)) do
                 lua_rule:write("\n\t" .. line)
             end
 
-            lua_rule:write("\n\tlog.debug('rule " .. file_name .. " evaluated succesfully')")
+            lua_rule:write("\n\tlog.debug('[Rule] " .. ansicolors('%{underline}' .. file_name).. " evaluated succesfully')")
             lua_rule:write("\nend\nreturn{\n\trule = rule\n}") -- bottom rule function wrapper
             lua_rule:close()
 
@@ -103,7 +104,7 @@ for k, v in pairs (fs.directory_list(packages_path)) do
             _G.events[name] = event
         end
         event:addAction(function ()
-            log.debug("event " .. name .. " triggered")
+            log.debug("[Event] " .. ansicolors('%{underline}' .. name) .. " triggered")
         end)
     end
     
@@ -133,7 +134,7 @@ for k, v in pairs (fs.directory_list(packages_path)) do
     
     local action_files = fs.get_all_files_in(v .. "actions/")
     for _, file_name in ipairs(action_files) do
-        log.debug("[patch] action " .. file_name)
+        log.trace("[Action] Patching " .. ansicolors('%{underline}' .. file_name))
         local action_file = assert(io.open(packages_path .. "/" .. package_name .. "/actions/" .. file_name, "r")) -- open yaml / pseudo lua action ifle
         local action_yaml = ""
         local line_num = 0
@@ -169,22 +170,13 @@ for k, v in pairs (fs.directory_list(packages_path)) do
         action_lua_file:write("\nend\n\nreturn{\n\tevent = event,\n\taction = action,\n\tpriority = priority\n}") -- ending return
         action_lua_file:close()
 
-        local loglua = require "log"
-        local ansicolors = require 'ansicolors'
-
-        loglua.error("Test of log.lua" .. ansicolors('%{underline} and underlines'))
-        loglua.trace("Test of log.lua")
-        loglua.info("Test of log.lua")
-        loglua.fatal("Test of log.lua")
-        loglua.warn("Test of log.lua")
-
         local action_require_name = "tmp-lua." .. string.sub( file_name, 0, string.len( file_name ) - 4 )
         local action_require = require(action_require_name)
         
         for k, v in pairs(action_require.event) do
             local action = _G.events[v]:addAction(
                 function(req)
-                    log.debug("action " .. file_name .. " about to run")
+                    log.debug("[Action] " .. ansicolors('%{underline}' .. file_name) .. " is about to run")
                     possibleResponse = action_require.action(req)
                     if possibleResponse ~= nil then
                         if possibleResponse.body ~= nil then
@@ -194,7 +186,7 @@ for k, v in pairs (fs.directory_list(packages_path)) do
                             end
                         end
                     end
-                    log.debug("action " .. file_name .. " ran succesfully")
+                    log.debug("[Action] " .. ansicolors('%{underline}' .. file_name) .. " ran succesfully")
                 end
             )
             _G.events[v]:setActionPriority(action, action_require.priority)
@@ -217,7 +209,7 @@ for k, v in pairs(fs.directory_list(packages_path)) do
 
             local rule_require_name = "tmp-lua." .. string.sub(file_name, 0, string.len( file_name ) - 4)
             local rule_require = require(rule_require_name)
-            log.debug("[load] rule " .. rule_require_name)
+            log.debug("[Rule] Loading " .. ansicolors('%{underline}' .. rule_require_name))
             table.insert(_G.rules, rule_require)
         end
     end
