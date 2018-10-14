@@ -28,19 +28,20 @@ local packages_path_length = #packages_path_modules
 -- can be required using it's name as if it was a lua module, ej:
 -- require "lighttouch-libs.actions.create_key"
 package.path = package.path..";./packages/?.lua"
---
---
--- Generating uuid to match the response with request
+
+os.execute("mkdir -p tmp-lua")
+
 local request_process_event = luvent.newEvent()
 events["requestProcess"] = request_process_event
 events["resProcess"] = luvent.newEvent()
 function req_process_action ()
     local request = ctx.msg
     request.path_segments = request.path:split("/")
+    -- Generating uuid to match the response with request
     debug.generate_uuid()
 end
-req_process_event:addAction(req_process_action)
-req_process_event:setActionPriority(req_process_action, 100)
+request_process_event:addAction(req_process_action)
+request_process_event:setActionPriority(req_process_action, 100)
 
 -- rule interpretter
 for k, v in pairs(fs.directory_list(packages_path)) do
