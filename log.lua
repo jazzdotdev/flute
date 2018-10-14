@@ -63,7 +63,7 @@ for i, x in ipairs(modes) do
     local msg = ...
     --local info = debug.getinfo( 2, "Sl" )
     --local lineinfo = info.short_src .. ":" .. info.currentline
-    local lineinfo = " "
+    local lineinfo = ""
 
     -- Output to console
     print(string.format("%s[%-6s%s]%s %s: %s",
