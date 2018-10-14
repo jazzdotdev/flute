@@ -63,11 +63,10 @@ local function print_res_info_return(res)
 
 end
 
-
 return {
     print_request_info = print_request_info,
     print_request_info_return = print_request_info_return,
     print_res_info_return = print_res_info_return,
     generate_uuid = generate_uuid,
-    uuid_return = uuid_return
+    uuid_return = uuid_return,
 }

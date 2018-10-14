@@ -169,6 +169,13 @@ for k, v in pairs (fs.directory_list(packages_path)) do
         action_lua_file:write("\nend\n\nreturn{\n\tevent = event,\n\taction = action,\n\tpriority = priority\n}") -- ending return
         action_lua_file:close()
 
+        local loglua = require "log"
+
+        loglua.error("Test of log.lua")
+        loglua.trace("Test of log.lua")
+        loglua.info("Test of log.lua")
+        loglua.fatal("Test of log.lua")
+        loglua.warn("Test of log.lua")
 
         local action_require_name = "tmp-lua." .. string.sub( file_name, 0, string.len( file_name ) - 4 )
         local action_require = require(action_require_name)
