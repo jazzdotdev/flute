@@ -11,7 +11,7 @@ local function uuid_return()
     return uuid_saved
 end
 
-local function print_request_info(req)
+local function print_request_info(request)
     local host = "0.0.0.0"
     if request.host then
         host = request.host
@@ -28,7 +28,7 @@ local function print_request_info(req)
     log.debug(message)
 end
 
-local function print_request_info_return(req)
+local function print_request_info_return(request)
     local host = "0.0.0.0"
     if request.host then
         host = request.host
