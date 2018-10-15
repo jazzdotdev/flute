@@ -56,15 +56,16 @@ package.path = package.path..";./packages/?.lua"
 local request_process_event = luvent.newEvent()
 events["request_process"] = request_process_event
 events["response_process"] = luvent.newEvent()
-function req_process_action ()
+function request_process_action ()
     log.trace("\tNew request received") -- temporary it can be here
     local request = ctx.msg
     request.path_segments = request.path:split("/")
     -- Generating uuid to match the response with request
     debug.generate_uuid()
 end
-request_process_event:addAction(req_process_action)
-request_process_event:setActionPriority(req_process_action, 100)
+request_process_event:addAction(request_process_action)
+request_process_event:setActionPriority(request_process_action, 100)
+
 
 -- rule interpretter
 for k, v in pairs(fs.directory_list(packages_path)) do
@@ -89,14 +90,17 @@ for k, v in pairs(fs.directory_list(packages_path)) do
 
             rule_yaml_table = yaml.load(rule_yaml)
 
-            if rule_yaml_table.priority > 100 then rule_yaml_table.priority = 100 end -- rule priority cannot be higher than 100 
+            -- rule priority cannot be higher than 100
+
+            local priority = rule_yaml_table.priority or 1
+            if priority > 100 then priority = 100 end
 
             --fs.copy(rule_path, rule_lua_path)
             local lua_rule = assert(io.open(rule_lua_path, "w+"))
             
             lua_rule:write("local log = require \"log\"\n")
-            lua_rule:write("local priority = " .. rule_yaml_table.priority)
-            lua_rule:write("\nlocal function rule(request, events)\n\tlog.debug('[Rule] " .. ansicolors('%{underline}' .. file_name) .. " with priority " .. rule_yaml_table.priority .. " starting to evaluate')")
+            lua_rule:write("local priority = " .. priority)
+            lua_rule:write("\nlocal function rule(request, events)\n\tlog.debug('[Rule] " .. ansicolors('%{underline}' .. file_name) .. " with priority " .. priority .. " starting to evaluate')")
             
             line_num = 0
             for line in io.lines(rule_path) do
@@ -224,24 +228,29 @@ for k, v in pairs (fs.directory_list(packages_path)) do
         local action_require = require(action_require_name)
         
         for k, v in pairs(action_require.event) do
-            local action = _G.events[v]:addAction(
-                function(req)
-                    log.debug("[Action] " .. ansicolors('%{underline}' .. file_name) .. " with priority " .. action_yaml_table.priority .. " is about to run")
-                    possibleResponse = action_require.action(req)
-                    if possibleResponse ~= nil then
-                        if possibleResponse.body ~= nil then
-                            _G.returned_response = possibleResponse
-                            if events["response_process"] then
-                                events["response_process"]:trigger()
+            local event = _G.events[v]
+            if event then
+                local action = event:addAction(
+                    function(req)
+                        log.debug("[Action] " .. ansicolors('%{underline}' .. file_name) .. " with priority " .. action_yaml_table.priority .. " is about to run")
+                        possibleResponse = action_require.action(req)
+                        if possibleResponse ~= nil then
+                            if possibleResponse.body ~= nil then
+                                _G.returned_response = possibleResponse
+                                if events["response_process"] then
+                                    events["response_process"]:trigger()
+                                end
                             end
                         end
+                        log.debug("[Action] " .. ansicolors('%{underline}' .. file_name) .. " ran succesfully")
                     end
-                    log.debug("[Action] " .. ansicolors('%{underline}' .. file_name) .. " ran succesfully")
+                )
+                event:setActionPriority(action, action_require.priority)
+                if isDisabled(file_name) then
+                    event:disableAction(action)
                 end
-            )
-            _G.events[v]:setActionPriority(action, action_require.priority)
-            if isDisabled(file_name) then
-                _G.events[v]:disableAction(action)
+            else
+                log.error("event " .. v .. " doesn't exist")
             end
         end
         
