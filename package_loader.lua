@@ -233,10 +233,11 @@ for k, v in pairs (fs.directory_list(packages_path)) do
                 local action = event:addAction(
                     function(req)
                         log.debug("[Action] " .. ansicolors('%{underline}' .. file_name) .. " with priority " .. action_yaml_table.priority .. " is about to run")
+                        -- TODO: figure out what to do if more than one responses are returned
                         possibleResponse = action_require.action(req)
                         if possibleResponse ~= nil then
                             if possibleResponse.body ~= nil then
-                                _G.returned_response = possibleResponse
+                                _G.response = possibleResponse
                                 if events["response_process"] then
                                     events["response_process"]:trigger()
                                 end
