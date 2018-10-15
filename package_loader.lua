@@ -54,8 +54,8 @@ local packages_path_length = #packages_path_modules
 package.path = package.path..";./packages/?.lua"
 
 local request_process_event = luvent.newEvent()
-events["request_process"] = request_process_event
-events["response_process"] = luvent.newEvent()
+events["incoming_request_received"] = request_process_event
+events["outgoing_response_about_to_be_sent"] = luvent.newEvent()
 function request_process_action ()
     log.trace("\tNew request received") -- temporary it can be here
     local request = ctx.msg
@@ -238,8 +238,8 @@ for k, v in pairs (fs.directory_list(packages_path)) do
                         if possibleResponse ~= nil then
                             if possibleResponse.body ~= nil then
                                 _G.response = possibleResponse
-                                if events["response_process"] then
-                                    events["response_process"]:trigger()
+                                if events["outgoing_response_about_to_be_sent"] then
+                                    events["outgoing_response_about_to_be_sent"]:trigger()
                                 end
                             end
                         end
