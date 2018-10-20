@@ -90,17 +90,17 @@ for k, v in pairs(fs.directory_list(packages_path)) do
 
             rule_yaml_table = yaml.load(rule_yaml)
 
-            -- rule priority cannot be higher than 100
+            -- rule weight cannot be higher than 100
 
-            local priority = rule_yaml_table.priority or 1
-            if priority > 100 then priority = 100 end
+            local weight = rule_yaml_table.weight or 1
+            if weight > 100 then weight = 100 end
 
             --fs.copy(rule_path, rule_lua_path)
             local lua_rule = assert(io.open(rule_lua_path, "w+"))
             
             lua_rule:write("local log = require \"log\"\n")
-            lua_rule:write("local priority = " .. priority)
-            lua_rule:write("\nlocal function rule(request, events)\n\tlog.debug('[Rule] " .. ansicolors('%{underline}' .. file_name) .. " with priority " .. priority .. " starting to evaluate')")
+            lua_rule:write("local weight = " .. weight)
+            lua_rule:write("\nlocal function rule(request, events)\n\tlog.debug('[Rule] " .. ansicolors('%{underline}' .. file_name) .. " with weight " .. weight .. " starting to evaluate')")
             
             line_num = 0
             for line in io.lines(rule_path) do
@@ -111,7 +111,7 @@ for k, v in pairs(fs.directory_list(packages_path)) do
             end
 
             lua_rule:write("\n\tlog.debug('[Rule] " .. ansicolors('%{underline}' .. file_name) .. " evaluated succesfully')")
-            lua_rule:write("\nend\nreturn{\n\trule = rule,\npriority = priority}") -- bottom rule function wrapper
+            lua_rule:write("\nend\nreturn{\n\trule = rule,\nweight = weight}") -- bottom rule function wrapper
             lua_rule:close()
 
             --fs.append_to_start(rule_lua_path, "local function rule(req, events)\n\tlog.trace('rule " .. file_name .. " starting to evaluate')") -- upper rule function wrapper
@@ -208,7 +208,7 @@ for k, v in pairs (fs.directory_list(packages_path)) do
         end
 
         action_lua_file:write(" }")
-        action_lua_file:write("\nlocal priority = " .. action_yaml_table.priority .. " \n\n")
+        action_lua_file:write("\nlocal weight = " .. action_yaml_table.weight .. " \n\n")
         action_lua_file:write("local log = require \"log\"\n")
         action_lua_file:write("local function action(request)\n") -- function wrapper
 
@@ -221,7 +221,7 @@ for k, v in pairs (fs.directory_list(packages_path)) do
             end
         end
 
-        action_lua_file:write("\nend\n\nreturn{\n\tevent = event,\n\taction = action,\n\tpriority = priority\n}") -- ending return
+        action_lua_file:write("\nend\n\nreturn{\n\tevent = event,\n\taction = action,\n\tweight = weight\n}") -- ending return
         action_lua_file:close()
 
         local action_require_name = "tmp-lua." .. package_name .. ".actions." .. string.sub( file_name, 0, string.len( file_name ) - 4 )
@@ -232,7 +232,7 @@ for k, v in pairs (fs.directory_list(packages_path)) do
             if event then
                 local action = event:addAction(
                     function(req)
-                        log.debug("[Action] " .. ansicolors('%{underline}' .. file_name) .. " with priority " .. action_yaml_table.priority .. " is about to run")
+                        log.debug("[Action] " .. ansicolors('%{underline}' .. file_name) .. " with weight " .. action_yaml_table.weight .. " is about to run")
                         -- TODO: figure out what to do if more than one responses are returned
                         possible_response = action_require.action(req)
                         if possible_response ~= nil then
@@ -246,7 +246,7 @@ for k, v in pairs (fs.directory_list(packages_path)) do
                         log.debug("[Action] " .. ansicolors('%{underline}' .. file_name) .. " ran succesfully")
                     end
                 )
-                event:setActionPriority(action, action_require.priority)
+                event:setActionPriority(action, action_require.weight)
                 if isDisabled(file_name) then
                     event:disableAction(action)
                 end
@@ -272,7 +272,7 @@ for k, v in pairs(fs.directory_list(packages_path)) do
             log.debug("[Rule] Loading " .. ansicolors('%{underline}' .. rule_require_name))
 
             --table.insert(_G.rules, rule_require)
-            _G.rules_priorities[rule_require_name] = rule_require.priority
+            _G.rules_priorities[rule_require_name] = rule_require.weight
         end
     end
 
