@@ -4,13 +4,6 @@
 -- foreach dir create specific path to events.txt, disabled_actions.txt, rules and actions
 -- 'trigger' the loaders
 
-function string:split(sep) -- string split function to extracting package name
-    local sep, fields = sep or ":", {}
-    local pattern = string.format("([^%s]+)", sep)
-    self:gsub(pattern, function(c) fields[#fields+1] = c end)
-    return fields
-end
-
 function spairs(t, order)
     -- collect the keys
     local keys = {}
