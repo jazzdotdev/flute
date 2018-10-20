@@ -234,10 +234,10 @@ for k, v in pairs (fs.directory_list(packages_path)) do
                     function(req)
                         log.debug("[Action] " .. ansicolors('%{underline}' .. file_name) .. " with priority " .. action_yaml_table.priority .. " is about to run")
                         -- TODO: figure out what to do if more than one responses are returned
-                        possible_response = action_require.action(req)
-                        if possible_response ~= nil then
-                            if possible_response.body ~= nil then
-                                _G.returned_response = possible_response
+                        possibleResponse = action_require.action(req)
+                        if possibleResponse ~= nil then
+                            if possibleResponse.body ~= nil then
+                                _G.response = possibleResponse
                                 if events["outgoing_response_about_to_be_sent"] then
                                     events["outgoing_response_about_to_be_sent"]:trigger()
                                 end
