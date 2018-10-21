@@ -85,7 +85,7 @@ for k, v in pairs(fs.directory_list(packages_path)) do
             for line in io.lines(rule_path) do
                 line_num = line_num + 1        
                 rule_yaml = rule_yaml .. line .. "\n" -- get only yaml lines
-                if line_num == 1 then break end
+                if line_num == 2 then break end
             end
 
             rule_yaml_table = yaml.load(rule_yaml)
@@ -100,18 +100,38 @@ for k, v in pairs(fs.directory_list(packages_path)) do
             
             lua_rule:write("local log = require \"log\"\n")
             lua_rule:write("local weight = " .. weight)
-            lua_rule:write("\nlocal function rule(request, events)\n\tlog.debug('[Rule] " .. ansicolors('%{underline}' .. file_name) .. " with weight " .. weight .. " starting to evaluate')")
+            lua_rule:write("\nlocal parameters = {")
+            for k, v in pairs(rule_yaml_table.parameters) do
+                if k == 1 then
+                    lua_rule:write(" \"" .. v .. "\"")
+                else
+                    lua_rule:write(", \"" .. v .. "\"")
+                end
+            end
+            lua_rule:write(" }")
+            lua_rule:write("\nlocal function rule(")
+            for k, v in pairs(rule_yaml_table.parameters) do
+                if k == 1 then
+                    lua_rule:write(v)
+                else
+                    lua_rule:write(", " .. v)
+                end
+            end
+            lua_rule:write(")")
+            lua_rule:write("\n\tlog.debug('[Rule] " .. ansicolors('%{underline}' .. file_name) .. " with weight " .. weight .. " starting to evaluate')")
             
             line_num = 0
             for line in io.lines(rule_path) do
                 line_num = line_num + 1
-                if line_num >= 2 then
+                if line_num > 2 then
                     lua_rule:write("\n\t" .. line)
                 end
             end
 
             lua_rule:write("\n\tlog.debug('[Rule] " .. ansicolors('%{underline}' .. file_name) .. " evaluated succesfully')")
-            lua_rule:write("\nend\nreturn{\n\trule = rule,\nweight = weight}") -- bottom rule function wrapper
+            lua_rule:write("\nend")
+            lua_rule:write("")
+            lua_rule:write("\nreturn{\n\trule = rule,\n\tweight = weight,\n\tparameters = parameters\n}") -- bottom rule function wrapper
             lua_rule:close()
 
             --fs.append_to_start(rule_lua_path, "local function rule(req, events)\n\tlog.trace('rule " .. file_name .. " starting to evaluate')") -- upper rule function wrapper
