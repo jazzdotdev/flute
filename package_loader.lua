@@ -27,10 +27,7 @@ function spairs(t, order)
     end
 end
 
-local utils = require "utils"
 local debug = require "debug"
-local luvent = require "Luvent"
-local fs = require "fs"
 local log = require "log"
 local ansicolors = require 'ansicolors'
 
@@ -120,17 +117,10 @@ for k, v in pairs (fs.directory_list(packages_path)) do
     local event_count = 0
     -- read events file
     local events_file = fs.read_file(v .. "events.txt")
-    -- put each line into an strings array
 
-    -- it does not register the events if they aren't followed by \n
-    local s = ""
-    for i=1, string.len(events_file) do
-        if string.sub( events_file, i, i ) ~= '\n' then
-            s = s .. string.sub( events_file, i, i )
-        else
-            table.insert( events_strings, s)
-            s = ""
-        end
+    -- put each line into a strings array
+    for line in fs.read_lines(v .. "events.txt") do
+        table.insert( events_strings, line )
     end
     
     -- count the lines
@@ -155,15 +145,8 @@ for k, v in pairs (fs.directory_list(packages_path)) do
     
     -- read disabled actions
     local disabled_actions = { }
-    local disabled_actions_file = fs.read_file(v .. "disabled_actions.txt")
-    local s = ""
-    for i=1, string.len(disabled_actions_file) do
-        if string.sub( disabled_actions_file, i, i ) ~= '\n' then
-            s = s .. string.sub( disabled_actions_file, i, i )
-        else
-            table.insert( disabled_actions, s )
-            s = ""
-        end
+    for line in fs.read_lines(v .. "disabled_actions.txt") do
+        table.insert( disabled_actions, line )
     end
     ---
     function isDisabled(action_file_name)
