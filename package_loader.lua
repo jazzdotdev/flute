@@ -27,7 +27,7 @@ function spairs(t, order)
     end
 end
 
-local debug = require "debug"
+local debug = require "lighttouch-debug"
 local log = require "log"
 local ansicolors = require 'ansicolors'
 
