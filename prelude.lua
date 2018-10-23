@@ -1,5 +1,5 @@
 log.debug("[loading] libraries")
-_G.utils = require "utils"
+
 _G.luvent = require "Luvent"
 _G.fs = require "fs"
 
