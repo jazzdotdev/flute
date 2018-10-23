@@ -27,7 +27,6 @@ function spairs(t, order)
     end
 end
 
-local debug = require "lighttouch-debug"
 local log = require "log"
 local ansicolors = require 'ansicolors'
 
@@ -50,8 +49,6 @@ function request_process_action ()
     log.trace("\tNew request received") -- temporary it can be here
     local request = ctx.msg
     request.path_segments = request.path:split("/")
-    -- Generating uuid to match the response with request
-    debug.generate_uuid()
 end
 request_process_event:addAction(request_process_action)
 request_process_event:setActionPriority(request_process_action, 100)
@@ -112,7 +109,11 @@ end
 ---
 
 for k, v in pairs (fs.directory_list(packages_path)) do
+
     local package_name = v:split( "/" )[packages_path_length+1] -- split package path in "/" places and get the last word 
+
+    log.trace("[Package] Patching actions for " .. ansicolors('%{underline}' .. package_name))
+
     local events_strings = { } -- events names table
     local event_count = 0
     -- read events file
@@ -229,9 +230,10 @@ for k, v in pairs (fs.directory_list(packages_path)) do
             else
                 log.error("event " .. v .. " doesn't exist")
             end
-        end
-        
+        end 
     end
+
+    log.trace("[Package] Finished patching actions for " .. ansicolors('%{underline}' .. package_name))
 end
 
 -- interpreted rules loading
