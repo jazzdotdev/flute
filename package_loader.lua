@@ -96,15 +96,7 @@ for k, v in pairs(fs.directory_list(packages_path)) do
                 end
             end
             lua_rule:write(" }")
-            lua_rule:write("\nlocal function rule(")
-            for k, v in pairs(rule_yaml_table.parameters) do
-                if k == 1 then
-                    lua_rule:write(v)
-                else
-                    lua_rule:write(", " .. v)
-                end
-            end
-            lua_rule:write(")")
+            lua_rule:write("\nlocal function rule(arguments)")
             lua_rule:write("\n\tlog.debug('[Rule] " .. ansicolors('%{underline}' .. file_name) .. " with weight " .. weight .. " starting to evaluate')")
             
             line_num = 0
