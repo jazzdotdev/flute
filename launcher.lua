@@ -9,5 +9,17 @@ log.outfile = "log/lighttouch"
 require "table_ext"
 require "string_ext"
 require "underscore_alias"
+require "package_loader"
 
 log.info("[loaded] LightTouch")
+
+
+-- Handler function
+return function (request)
+  events["incoming_request_received"]:trigger(request)
+  for k, v in pairs(rules) do
+    v.rule(request, events)
+  end
+   
+  return response
+end
