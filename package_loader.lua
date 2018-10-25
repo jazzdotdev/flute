@@ -184,7 +184,7 @@ for k, v in pairs (fs.directory_list(packages_path)) do
         for line in io.lines(packages_path .. "/" .. package_name .. "/actions/" .. file_name) do
             line_num = line_num + 1        
             action_yaml = action_yaml .. line .. "\n" -- get only yaml lines
-            if line_num == 2 then break end
+            if line_num == 3 then break end
         end
         action_yaml_table = yaml.load(action_yaml) -- decode yaml to lua table
         local action_lua_file = assert(io.open("tmp-lua/" .. package_name .. "/actions/" .. file_name, "w+")) -- w+ to override old files
@@ -199,7 +199,16 @@ for k, v in pairs (fs.directory_list(packages_path)) do
         action_lua_file:write(" }")
         action_lua_file:write("\nlocal weight = " .. action_yaml_table.weight .. " \n\n")
         action_lua_file:write("local log = require \"log\"\n")
-        action_lua_file:write("local function action(request)\n") -- function wrapper
+        action_lua_file:write("local input_parameters = {")
+        for k, v in pairs(action_yaml_table.input_parameters) do
+            if k == 1 then
+                action_lua_file:write(" \"" .. v .. "\"")
+            else
+                action_lua_file:write(", \"" .. v .. "\"")
+            end
+        end
+        action_lua_file:write("}")
+        action_lua_file:write("\nlocal function action(arguments)\n") -- function wrapper
 
         line_num = 0
 
@@ -210,7 +219,8 @@ for k, v in pairs (fs.directory_list(packages_path)) do
             end
         end
 
-        action_lua_file:write("\nend\n\nreturn{\n\tevent = event,\n\taction = action,\n\tweight = weight\n}") -- ending return
+        action_lua_file:write("\nend")
+        action_lua_file:write("\n\nreturn{\n\tevent = event,\n\taction = action,\n\tweight = weight,\n\tinput_parameters = input_parameters\n}") -- ending return
         action_lua_file:close()
 
         local action_require_name = "tmp-lua." .. package_name .. ".actions." .. string.sub( file_name, 0, string.len( file_name ) - 4 )
