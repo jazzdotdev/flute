@@ -7,6 +7,7 @@
 local log = require "log"
 local ansicolors = require 'ansicolors'
 
+events_actions = { }
 _G.rules = {} -- rules table to store them from all packages
 _G.rules_priorities = {} -- table to store priorities of rules, so we can sort _G.rules table later by these priorities
 _G.events = { } -- events table
@@ -86,12 +87,15 @@ for k, v in pairs(fs.directory_list(packages_path)) do
 
             lua_rule:write("\n\tlog.debug('[Rule] " .. ansicolors('%{underline}' .. file_name) .. " evaluated succesfully')")
             lua_rule:write("\nend")
-            lua_rule:write("")
+            --lua_rule:write("\n\nfunction get_action_parameters")
             lua_rule:write("\nreturn{\n\trule = rule,\n\tweight = weight,\n\tparameters = parameters\n}") -- bottom rule function wrapper
             lua_rule:close()
 
             --fs.append_to_start(rule_lua_path, "local function rule(req, events)\n\tlog.trace('rule " .. file_name .. " starting to evaluate')") -- upper rule function wrapper
+            
 
+            -- Rules know which event are they triggering. They don't know the action
+            -- We have to have events - actions table to get it done
         end
     end
 end
@@ -127,6 +131,7 @@ for k, v in pairs (fs.directory_list(packages_path)) do
         if not event then
             event = luvent.newEvent()
             _G.events[name] = event
+            events_actions[name] = { }
         end
         event:addAction(function ()
             log.debug("[Event] " .. ansicolors('%{underline}' .. name) .. " triggered")
@@ -207,10 +212,10 @@ for k, v in pairs (fs.directory_list(packages_path)) do
             local event = _G.events[v]
             if event then
                 local action = event:addAction(
-                    function(req)
+                    function(req) -- we are declaring event function with (req), what if action need more params?
                         log.debug("[Action] " .. ansicolors('%{underline}' .. file_name) .. " with weight " .. action_yaml_table.weight .. " is about to run")
                         -- TODO: figure out what to do if more than one responses are returned
-                        possible_response = action_require.action(req)
+                        possible_response = action_require.action(req) -- we are parsing here the req, what if action need more params?
                         if possible_response ~= nil then
                             if possible_response.body ~= nil then
                                 _G.returned_response = possible_response
