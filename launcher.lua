@@ -9,6 +9,10 @@ log.outfile = "log/lighttouch"
 require "table_ext"
 require "string_ext"
 require "underscore_alias"
+
+_G.content = require "content"
+_G.keys = require "keys"
+
 require "package_loader"
 
 log.info("[loaded] LightTouch")
