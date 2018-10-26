@@ -20,10 +20,23 @@ log.info("[loaded] LightTouch")
 
 -- Handler function
 return function (request)
-  events["incoming_request_received"]:trigger(request)
-  for k, v in pairs(rules) do
-    v.rule(request, events)
-  end
+
+  local status = xpcall(function ()
+    events["incoming_request_received"]:trigger(request)
+    for k, v in pairs(rules) do
+      v.get_action_parameters(events_actions)
+      local rule_arguments = { }
+      for k1, v1 in pairs(v.parameters) do
+          if v1 == "events" then rule_arguments[v1] = events
+          elseif v1 == "request" then rule_arguments[v1] = request
+          -- elseif v1 == "parameter-name" then rule_arguments[v1] = parameter_value - this is how we add parameters to arugments table
+          end
+              
+      end
+    end
+      v.rule(rule_arguments)
+  end, err)
    
-  return response
+return response
+
 end

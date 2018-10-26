@@ -50,7 +50,7 @@ for k, v in pairs(fs.directory_list(packages_path)) do
             for line in io.lines(rule_path) do
                 line_num = line_num + 1        
                 rule_yaml = rule_yaml .. line .. "\n" -- get only yaml lines
-                if line_num == 2 then break end
+                if line_num == 3 then break end
             end
 
             rule_yaml_table = yaml.load(rule_yaml)
@@ -64,7 +64,8 @@ for k, v in pairs(fs.directory_list(packages_path)) do
             local lua_rule = assert(io.open(rule_lua_path, "w+"))
             
             lua_rule:write("local log = require \"log\"\n")
-            lua_rule:write("local weight = " .. weight)
+            lua_rule:write("\nlocal weight = " .. weight)
+            lua_rule:write("\nlocal event = " .. rule_yaml_table.event)
             lua_rule:write("\nlocal parameters = {")
             for k, v in pairs(rule_yaml_table.parameters) do
                 if k == 1 then
@@ -80,20 +81,24 @@ for k, v in pairs(fs.directory_list(packages_path)) do
             line_num = 0
             for line in io.lines(rule_path) do
                 line_num = line_num + 1
-                if line_num > 2 then
+                if line_num > 3 then
                     lua_rule:write("\n\t" .. line)
                 end
             end
 
             lua_rule:write("\n\tlog.debug('[Rule] " .. ansicolors('%{underline}' .. file_name) .. " evaluated succesfully')")
             lua_rule:write("\nend")
-            --lua_rule:write("\n\nfunction get_action_parameters")
+            lua_rule:write("\n\nfunction get_action_parameters(events_actions)")
+            lua_rule:write("\n\tfor k, v in pairs(events_actions[event]) do")
+            lua_rule:write("\n\t\tfor k1, v1 in pairs(v[1].input_parameters) do")
+            lua_rule:write("\n\t\t\ttable.insert(parameters, v1)")
+            lua_rule:write("\n\t\tend")
+            lua_rule:write("\n\tend")
+            lua_rule:write("\nend")
             lua_rule:write("\nreturn{\n\trule = rule,\n\tweight = weight,\n\tparameters = parameters\n}") -- bottom rule function wrapper
             lua_rule:close()
 
             --fs.append_to_start(rule_lua_path, "local function rule(req, events)\n\tlog.trace('rule " .. file_name .. " starting to evaluate')") -- upper rule function wrapper
-            
-
             -- Rules know which event are they triggering. They don't know the action
             -- We have to have events - actions table to get it done
         end
@@ -127,11 +132,11 @@ for k, v in pairs (fs.directory_list(packages_path)) do
     
     for i=1, event_count do
         local name = events_strings[i]
+        events_actions[name] = { }
         local event = _G.events[name]
         if not event then
             event = luvent.newEvent()
             _G.events[name] = event
-            events_actions[name] = { }
         end
         event:addAction(function ()
             log.debug("[Event] " .. ansicolors('%{underline}' .. name) .. " triggered")
@@ -196,7 +201,7 @@ for k, v in pairs (fs.directory_list(packages_path)) do
 
         for line in io.lines(packages_path .. "/" .. package_name .. "/actions/" .. file_name) do
             line_num = line_num + 1
-            if line_num > 2 then
+            if line_num > 3 then
                 action_lua_file:write(line .. "\n\t")
             end
         end
@@ -211,11 +216,12 @@ for k, v in pairs (fs.directory_list(packages_path)) do
         for k, v in pairs(action_require.event) do
             local event = _G.events[v]
             if event then
+                table.insert( events_actions[v] , action_require )
                 local action = event:addAction(
-                    function(req) -- we are declaring event function with (req), what if action need more params?
+                    function(arguments)
                         log.debug("[Action] " .. ansicolors('%{underline}' .. file_name) .. " with weight " .. action_yaml_table.weight .. " is about to run")
                         -- TODO: figure out what to do if more than one responses are returned
-                        possible_response = action_require.action(req) -- we are parsing here the req, what if action need more params?
+                        possible_response = action_require.action(arguments) -- we are parsing here the req, what if action need more params?
                         if possible_response ~= nil then
                             if possible_response.body ~= nil then
                                 _G.returned_response = possible_response
@@ -263,5 +269,6 @@ end
 for k,v in sorted_pairs(_G.rules_priorities, function(t,a,b) return t[b] < t[a] end) do
     table.insert(_G.rules, require(k))
 end
+
 --
 
