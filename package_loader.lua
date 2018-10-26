@@ -5,7 +5,7 @@
 -- 'trigger' the loaders
 
 local log = require "log"
-local ansicolors = require 'ansicolors'
+local ansicolors = require 'third-party.ansicolors'
 
 _G.rules = {} -- rules table to store them from all packages
 _G.rules_priorities = {} -- table to store priorities of rules, so we can sort _G.rules table later by these priorities
