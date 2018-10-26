@@ -4,7 +4,6 @@
 local keys = {}
 
 local fs = require "fs"
-local split_yaml_header = (require "helpers").split_yaml_header
 
 function keys.iter_content_files_of (profile, fn)
   local dir = "content/" .. profile .. "/"
@@ -16,9 +15,9 @@ function keys.iter_content_files_of (profile, fn)
       log.error("could not open " .. path)
     end
 
-    local header, content = split_yaml_header(file_content)
+    local header, body = content.split_header(file_content)
 
-    local result = fn(file_uuid, header, content)
+    local result = fn(file_uuid, header, body)
     if result then return result end
   end
 end
