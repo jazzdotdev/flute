@@ -65,7 +65,7 @@ for k, v in pairs(fs.directory_list(packages_path)) do
             
             lua_rule:write("local log = require \"log\"\n")
             lua_rule:write("\nlocal weight = " .. weight)
-            lua_rule:write("\nlocal event = " .. "\"rule_yaml_table.event\"")
+            lua_rule:write("\nlocal event = " .. "\"" .. rule_yaml_table.event .. "\"")
             lua_rule:write("\nlocal parameters = {")
             for k, v in pairs(rule_yaml_table.parameters) do
                 if k == 1 then
@@ -88,14 +88,19 @@ for k, v in pairs(fs.directory_list(packages_path)) do
 
             lua_rule:write("\n\tlog.debug('[Rule] " .. ansicolors('%{underline}' .. file_name) .. " evaluated succesfully')")
             lua_rule:write("\nend")
-            lua_rule:write("\n\nfunction get_action_parameters(events_actions)")
+            lua_rule:write("\n\nlocal function get_action_parameters(events_actions)")
             lua_rule:write("\n\tfor k, v in pairs(events_actions[event]) do")
-            lua_rule:write("\n\t\tfor k1, v1 in pairs(v[1].input_parameters) do")
-            lua_rule:write("\n\t\t\ttable.insert(parameters, v1)")
+            lua_rule:write("\n\t\tlog.debug(\"first for loop\")")
+            lua_rule:write("\n\t\tif v[1] then")
+            lua_rule:write("\n\t\t\tfor k1, v1 in pairs(v[1].input_parameters) do")
+            lua_rule:write("\n\t\t\t\tif v1 then")
+            lua_rule:write("\n\t\t\t\t\ttable.insert(parameters, v1)")
+            lua_rule:write("\n\t\t\t\tend")
+            lua_rule:write("\n\t\t\tend")
             lua_rule:write("\n\t\tend")
             lua_rule:write("\n\tend")
             lua_rule:write("\nend")
-            lua_rule:write("\nreturn{\n\trule = rule,\n\tweight = weight,\n\tparameters = parameters\n}") -- bottom rule function wrapper
+            lua_rule:write("\nreturn{\n\trule = rule,\n\tweight = weight,\n\tparameters = parameters,\n\tget_action_parameters = get_action_parameters\n}") -- bottom rule function wrapper
             lua_rule:close()
 
             --fs.append_to_start(rule_lua_path, "local function rule(req, events)\n\tlog.trace('rule " .. file_name .. " starting to evaluate')") -- upper rule function wrapper
