@@ -20,7 +20,7 @@ function keys.verify_http_signature (message)
   log.debug("keyId", keyId)
   log.debug("signature", signature)
 
-  local pub_key = content.iter_files(keyId,
+  local pub_key = content.walk_documents(keyId,
     function (file_uuid, header, body)
       if header.type == "key" and header.kind == "sign_public" then
         return body
@@ -45,7 +45,7 @@ function keys.verify_http_signature (message)
 end
 
 function keys.sign_http_message (message)
-  local profile_uuid = content.iter_files("home",
+  local profile_uuid = content.walk_documents("home",
     function (file_uuid, header, body)
       if header.type == "profile" then
         return file_uuid
@@ -58,7 +58,7 @@ function keys.sign_http_message (message)
     return false
   end
 
-  local priv_key = content.iter_files("home",
+  local priv_key = content.walk_documents("home",
     function (file_uuid, header, body)
       if header.type == "key"
       and header.kind == "sign_private"
