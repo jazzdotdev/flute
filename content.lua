@@ -3,7 +3,7 @@ local content = {}
 
 function content.split_header (document_text)
     local yaml_text, body = document_text:match("(.-)\n%.%.%.*\n?(.*)")
-    local header = yaml.load(yaml_text)
+    local header = yaml.to_table(yaml_text)
     return header, body
 end
 
@@ -28,7 +28,7 @@ function content.get_model (name)
   if not content then
     return nil, "model " .. name .. " not found"
   end
-  local model_def = yaml.load(content)
+  local model_def = yaml.to_table(content)
   local fields = {}
 
   for name, field_def in pairs(model_def.fields) do
@@ -108,7 +108,7 @@ function content.write_file (profile, file_uuid, header, body)
   local dir = "content/" .. profile .. "/"
   os.execute("mkdir -p " .. dir)
   local path = dir .. file_uuid
-  local body = yaml.dump(header) .. "\n...\n" .. (body or "")
+  local body = yaml.from_table(header) .. "\n...\n" .. (body or "")
   local file = io.open(path, "w")
   if not file then
     log.error("Could not open file", path)

@@ -41,6 +41,11 @@ function keys.verify_http_signature (message)
   log.trace("signature string", signature_string)
 
   local is_valid = pub_key:verify_detached(signature_string, signature)
+
+  if is_valid then
+    message.profile_uuid = keyId
+  end
+  
   return is_valid
 end
 
