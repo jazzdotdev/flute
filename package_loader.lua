@@ -65,7 +65,7 @@ for k, v in pairs(fs.directory_list(packages_path)) do
             
             lua_rule:write("local log = require \"log\"\n")
             lua_rule:write("\nlocal weight = " .. weight)
-            lua_rule:write("\nlocal event = " .. rule_yaml_table.event)
+            lua_rule:write("\nlocal event = " .. "\"rule_yaml_table.event\"")
             lua_rule:write("\nlocal parameters = {")
             for k, v in pairs(rule_yaml_table.parameters) do
                 if k == 1 then
