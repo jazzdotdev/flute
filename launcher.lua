@@ -1,6 +1,6 @@
 log.debug("[loading] libraries")
 
-_G.luvent = require "Luvent"
+_G.luvent = require "third-party.Luvent"
 _G.fs = require "fs"
 
 local log = require "log"

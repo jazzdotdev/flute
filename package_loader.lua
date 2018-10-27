@@ -5,7 +5,7 @@
 -- 'trigger' the loaders
 
 local log = require "log"
-local ansicolors = require 'ansicolors'
+local ansicolors = require 'third-party.ansicolors'
 
 events_actions = { }
 _G.rules = {} -- rules table to store them from all packages
@@ -53,7 +53,7 @@ for k, v in pairs(fs.directory_list(packages_path)) do
                 if line_num == 3 then break end
             end
 
-            rule_yaml_table = yaml.load(rule_yaml)
+            rule_yaml_table = yaml.to_table(rule_yaml)
 
             -- rule weight cannot be higher than 100
 
@@ -173,7 +173,7 @@ for k, v in pairs (fs.directory_list(packages_path)) do
             action_yaml = action_yaml .. line .. "\n" -- get only yaml lines
             if line_num == 3 then break end
         end
-        action_yaml_table = yaml.load(action_yaml) -- decode yaml to lua table
+        action_yaml_table = yaml.to_table(action_yaml) -- decode yaml to lua table
         local action_lua_file = assert(io.open("tmp-lua/" .. package_name .. "/actions/" .. file_name, "w+")) -- w+ to override old files
         action_lua_file:write("local event = { \"" .. action_yaml_table.event[1] .. "\"") -- put values from yaml in lua form
 
