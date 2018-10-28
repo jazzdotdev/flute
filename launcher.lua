@@ -4,6 +4,7 @@ _G.luvent = require "third-party.Luvent"
 _G.fs = require "fs"
 
 local log = require "log"
+fs.create_dir("log")
 log.outfile = "log/lighttouch"
 
 require "table_ext"

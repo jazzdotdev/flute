@@ -106,7 +106,7 @@ end
 
 function content.write_file (profile, file_uuid, header, body)
   local dir = "content/" .. profile .. "/"
-  os.execute("mkdir -p " .. dir)
+  fs.create_dir(dir, true)
   local path = dir .. file_uuid
   local body = yaml.from_table(header) .. "\n...\n" .. (body or "")
   local file = io.open(path, "w")
