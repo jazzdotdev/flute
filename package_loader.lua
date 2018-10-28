@@ -32,15 +32,19 @@ request_process_event:setActionPriority(request_process_action, 100)
 
 
 -- rule interpretter
-for k, v in pairs(fs.directory_list(packages_path)) do
-    local package_name = v:split( "/" )[packages_path_length+1] -- split package path in "/" places and get the last word 
-    os.execute("mkdir -p tmp-lua/" .. package_name .. "/rules")
-    local rule_files = fs.get_all_files_in(v .. "rules/") -- get all rules from this package
+for k, package_name in pairs(fs.directory_list(packages_path)) do
+    fs.create_dir("tmp-lua/" .. package_name .. "/rules/", true)
+    local rules_path = packages_path .. "/".. package_name .. "/rules/"
+    local rule_files = {} -- get all rules from this package
+    -- Rules path is optional
+    if fs.exists(rules_path) then
+        rule_files = fs.get_all_files_in(rules_path)
+    end
     
     for _, file_name in ipairs(rule_files) do
         if file_name ~= "lua_files/" then
             local rule_lua_path = "tmp-lua/" .. package_name .. "/" .. "rules/" .. file_name
-            local rule_path = packages_path .. "/" .. package_name .. "/rules/" .. file_name
+            local rule_path = rules_path .. file_name
             log.trace("[Rule] Patching " .. ansicolors('%{underline}' .. file_name))
 
             local rule_yaml = ""
@@ -85,19 +89,16 @@ for k, v in pairs(fs.directory_list(packages_path)) do
 end
 ---
 
-for k, v in pairs (fs.directory_list(packages_path)) do
-
-    local package_name = v:split( "/" )[packages_path_length+1] -- split package path in "/" places and get the last word 
+for k, package_name in pairs (fs.directory_list(packages_path)) do
+    local package_path = packages_path .. "/" .. package_name .. "/"
 
     log.trace("[Package] Patching actions for " .. ansicolors('%{underline}' .. package_name))
 
     local events_strings = { } -- events names table
     local event_count = 0
-    -- read events file
-    local events_file = fs.read_file(v .. "events.txt")
 
     -- put each line into a strings array
-    for line in fs.read_lines(v .. "events.txt") do
+    for line in fs.read_lines(package_path .. "events.txt") do
         table.insert( events_strings, line )
     end
     
@@ -123,7 +124,7 @@ for k, v in pairs (fs.directory_list(packages_path)) do
     
     -- read disabled actions
     local disabled_actions = { }
-    for line in fs.read_lines(v .. "disabled_actions.txt") do
+    for line in fs.read_lines(package_path .. "disabled_actions.txt") do
         table.insert( disabled_actions, line )
     end
     ---
@@ -138,8 +139,13 @@ for k, v in pairs (fs.directory_list(packages_path)) do
     end
     -- actions loader
     
-    local action_files = fs.get_all_files_in(v .. "actions/")
-    os.execute("mkdir -p tmp-lua/" .. package_name .. "/actions")
+    local actions_path = package_path .. "actions/"
+    local action_files = {} -- actions path is optional
+    if fs.exists(actions_path) then
+        action_files = fs.get_all_files_in(actions_path)
+    end
+
+    fs.create_dir("tmp-lua/" .. package_name .. "/actions/", true)
     for _, file_name in ipairs(action_files) do
         log.trace("[Action] Patching " .. ansicolors('%{underline}' .. file_name))
         local action_file = assert(io.open(packages_path .. "/" .. package_name .. "/actions/" .. file_name, "r")) -- open yaml / pseudo lua action ifle
@@ -214,10 +220,14 @@ for k, v in pairs (fs.directory_list(packages_path)) do
 end
 
 -- interpreted rules loading
-for k, v in pairs(fs.directory_list(packages_path)) do
-    local package_name = v:split( "/" )[packages_path_length+1] -- split package path in "/" places and get the last word 
+for k, package_name in pairs(fs.directory_list(packages_path)) do
 
-    local rule_files = fs.get_all_files_in(v .. "rules/") -- get all rules from this package
+    local rules_path = packages_path .. "/".. package_name .. "/rules/"
+    local rule_files = {} -- get all rules from this package
+    -- Rules path is optional
+    if fs.exists(rules_path) then
+        rule_files = fs.get_all_files_in(rules_path)
+    end
 
     for _, file_name in ipairs(rule_files) do
         if file_name ~= "lua_files/" then
