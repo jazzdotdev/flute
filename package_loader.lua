@@ -45,7 +45,7 @@ for k, package_name in pairs(fs.directory_list(packages_path)) do
         if file_name ~= "lua_files/" then
             local rule_lua_path = "tmp-lua/" .. package_name .. "/" .. "rules/" .. file_name
             local rule_path = rules_path .. file_name
-            log.trace("[Rule] Patching " .. ansicolors('%{underline}' .. file_name))
+            log.trace("[patching] rule " .. ansicolors('%{underline}' .. file_name))
 
             local rule_yaml = ""
             local rule_yaml_table
@@ -92,7 +92,7 @@ end
 for k, package_name in pairs (fs.directory_list(packages_path)) do
     local package_path = packages_path .. "/" .. package_name .. "/"
 
-    log.trace("[Package] Patching actions for " .. ansicolors('%{underline}' .. package_name))
+    log.trace("[patching] actions for package " .. ansicolors('%{underline}' .. package_name))
 
     local events_strings = { } -- events names table
     local event_count = 0
@@ -118,7 +118,7 @@ for k, package_name in pairs (fs.directory_list(packages_path)) do
             _G.events[name] = event
         end
         event:addAction(function ()
-            log.debug("[Event] " .. ansicolors('%{underline}' .. name) .. " triggered")
+            log.debug("[triggering] event"  .. ansicolors('%{underline}' .. name) )
         end)
     end
     
@@ -147,7 +147,7 @@ for k, package_name in pairs (fs.directory_list(packages_path)) do
 
     fs.create_dir("tmp-lua/" .. package_name .. "/actions/", true)
     for _, file_name in ipairs(action_files) do
-        log.trace("[Action] Patching " .. ansicolors('%{underline}' .. file_name))
+        log.trace("[patching] action " .. ansicolors('%{underline}' .. file_name))
         local action_file = assert(io.open(packages_path .. "/" .. package_name .. "/actions/" .. file_name, "r")) -- open yaml / pseudo lua action ifle
         local action_yaml = ""
         local line_num = 0
@@ -192,7 +192,7 @@ for k, package_name in pairs (fs.directory_list(packages_path)) do
             if event then
                 local action = event:addAction(
                     function(req)
-                        log.debug("[Action] " .. ansicolors('%{underline}' .. file_name) .. " with priority " .. action_yaml_table.priority .. " is about to run")
+                        log.debug("[running] action " .. ansicolors('%{underline}' .. file_name) .. " with priority " .. action_yaml_table.priority )
                         -- TODO: figure out what to do if more than one responses are returned
                         possibleResponse = action_require.action(req)
                         if possibleResponse ~= nil then
@@ -203,7 +203,7 @@ for k, package_name in pairs (fs.directory_list(packages_path)) do
                                 end
                             end
                         end
-                        log.debug("[Action] " .. ansicolors('%{underline}' .. file_name) .. " ran succesfully")
+                        log.debug("[completed] action " .. ansicolors('%{underline}' .. file_name) )
                     end
                 )
                 event:setActionPriority(action, action_require.priority)
@@ -216,7 +216,7 @@ for k, package_name in pairs (fs.directory_list(packages_path)) do
         end 
     end
 
-    log.trace("[Package] Finished patching actions for " .. ansicolors('%{underline}' .. package_name))
+    log.trace("[patched]] actions for package " .. ansicolors('%{underline}' .. package_name))
 end
 
 -- interpreted rules loading
@@ -234,7 +234,7 @@ for k, package_name in pairs(fs.directory_list(packages_path)) do
 
             local rule_require_name = "tmp-lua." .. package_name .. ".rules." .. string.sub(file_name, 0, string.len( file_name ) - 4)
             local rule_require = require(rule_require_name)
-            log.debug("[Rule] Loading " .. ansicolors('%{underline}' .. rule_require_name))
+            log.debug("[loading] rule " .. ansicolors('%{underline}' .. rule_require_name))
 
             --table.insert(_G.rules, rule_require)
             _G.rules_priorities[rule_require_name] = rule_require.priority

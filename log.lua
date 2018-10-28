@@ -66,11 +66,11 @@ for i, x in ipairs(modes) do
     local lineinfo = ""
 
     -- Output to console
-    print(string.format("%s[%-5s]%s %s %s: %s",
+    print(string.format("%s %s %s %s %s %s",
+                        os.date("%H:%M:%S"),
                         log.usecolor and x.color or "",
                         nameupper,
                         log.usecolor and "\27[0m" or "",
-                        os.date("%H:%M:%S"),
                         lineinfo,
                         msg))
 
