@@ -23,13 +23,17 @@ function model_metatable:validate (object)
   return true
 end
 
-function content.get_model (name)
+function content.get_model_definition (name)
   local content = fs.read_file("models/" .. name .. ".yaml")
   if not content then
     return nil, "model " .. name .. " not found"
   end
-  local model_def = yaml.to_table(content)
-  local fields = {}
+  return yaml.to_table(content)
+end
+
+function content.get_validator (name)
+  local model_def, err = content.get_model_definition(name)
+  if not model_def then return nil, err end
 
   for name, field_def in pairs(model_def.fields) do
     local validator = valua:new()
@@ -62,7 +66,7 @@ function content.validate_document (header)
   if not header.model then
     return false, "document does not define a model"
   end
-  local model, err = content.get_model(header.model)
+  local model, err = content.get_validator(header.model)
   if not model then
     return false, err
   end
