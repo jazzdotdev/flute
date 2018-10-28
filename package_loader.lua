@@ -216,7 +216,7 @@ for k, package_name in pairs (fs.directory_list(packages_path)) do
         end 
     end
 
-    log.trace("[patched]] actions for package " .. ansicolors('%{underline}' .. package_name))
+    log.trace("[patched] actions for package " .. ansicolors('%{underline}' .. package_name))
 end
 
 -- interpreted rules loading
