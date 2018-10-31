@@ -7,13 +7,9 @@
 local log = require "log"
 local ansicolors = require 'third-party.ansicolors'
 local every_events_actions_parameters = { }
+local events_actions = { } -- events_actions["event_name"] = { event_action1_req, event_action2_req, ... etc. }
 
-local function table_contains(tab, val)
-    for k, v in pairs(tab) do
-        if v == val then return true end
-    end
-    return false
-end
+local utils = require "utils"
 
 _G.rules = {} -- rules table to store them from all packages
 _G.rules_priorities = {} -- table to store priorities of rules, so we can sort _G.rules table later by these priorities
@@ -29,7 +25,9 @@ package.path = package.path..";./packages/?.lua"
 
 local request_process_event = luvent.newEvent()
 events["incoming_request_received"] = request_process_event
+events_actions["incoming_request_received"] = { }
 events["outgoing_response_about_to_be_sent"] = luvent.newEvent()
+events_actions["outgoing_response_about_to_be_sent"] = { }
 function request_process_action ()
     log.trace("\tNew request received") -- temporary it can be here
     local request = ctx.msg
@@ -66,6 +64,7 @@ for k, package_name in pairs (fs.directory_list(packages_path)) do
         if not event then
             event = luvent.newEvent()
             _G.events[name] = event
+            events_actions[name] = { } -- create table of actions for that event
         end
         event:addAction(function ()
             log.debug("[triggering] event"  .. ansicolors('%{underline}' .. name) )
@@ -122,7 +121,7 @@ for k, package_name in pairs (fs.directory_list(packages_path)) do
         action_lua_file:write("local log = require \"log\"\n")
         action_lua_file:write("local input_parameters = { " .. "\"" .. action_yaml_table.input_parameters[1] .. "\"")
         for k, v in pairs(action_yaml_table.input_parameters) do
-            if not table_contains(every_events_actions_parameters, v) then table.insert( every_events_actions_parameters, v ) end
+            if not utils.table_contains(every_events_actions_parameters, v) then table.insert( every_events_actions_parameters, v ) end
             if k ~= 1 then
                 action_lua_file:write(", \"" .. v .. "\"")
             end
@@ -145,7 +144,7 @@ for k, package_name in pairs (fs.directory_list(packages_path)) do
             end
         end
 
-        action_lua_file:write("\nend\n\nreturn{\n\tevent = event,\n\taction = action,\n\tpriority = priority\n}") -- ending return
+        action_lua_file:write("\nend\n\nreturn{\n\tevent = event,\n\taction = action,\n\tpriority = priority,\n\tinput_parameters = input_parameters\n}") -- ending return
         action_lua_file:close()
 
         local action_require_name = "tmp-lua." .. package_name .. ".actions." .. string.sub( file_name, 0, string.len( file_name ) - 4 )
@@ -154,6 +153,7 @@ for k, package_name in pairs (fs.directory_list(packages_path)) do
         for k, v in pairs(action_require.event) do
             local event = _G.events[v]
             if event then
+                table.insert( events_actions[v], action_require )
                 local action = event:addAction(
                     function(req) -- ISSUE: we have to declare here as much arguments as the action needs(maybe do a table of arguments?)
                         log.debug("[running] action " .. ansicolors('%{underline}' .. file_name) .. " with priority " .. action_yaml_table.priority )
@@ -220,6 +220,7 @@ for k, package_name in pairs(fs.directory_list(packages_path)) do
             local lua_rule = assert(io.open(rule_lua_path, "w+"))
             
             lua_rule:write("local log = require \"log\"\n")
+            lua_rule:write("local utils = require \"utils\"\n")
             lua_rule:write("local priority = " .. priority)
             lua_rule:write("\nlocal events_table = { " .. "\"" .. rule_yaml_table.events_table[1] .. "\"")
             for k, v in pairs(rule_yaml_table.events_table) do
@@ -229,6 +230,7 @@ for k, package_name in pairs(fs.directory_list(packages_path)) do
             end
             lua_rule:write("}")
             lua_rule:write("\nlocal input_parameter = \"" .. rule_yaml_table.input_parameter .. "\"")
+            lua_rule:write("\nlocal events_parameters = { }")
             lua_rule:write("\nlocal function rule(" .. rule_yaml_table.input_parameter)
             for k, v in pairs (every_events_actions_parameters) do
                 if v ~= rule_yaml_table.input_parameter then 
@@ -247,7 +249,20 @@ for k, package_name in pairs(fs.directory_list(packages_path)) do
             end
 
             lua_rule:write("\n\tlog.debug('[Rule] " .. ansicolors('%{underline}' .. file_name) .. " evaluated succesfully')")
-            lua_rule:write("\nend\nreturn{\n\trule = rule,\npriority = priority}") -- bottom rule function wrapper
+            lua_rule:write("\nend\n") -- bottom rule function wrapper
+            
+            lua_rule:write("\nlocal function get_events_parameters(events_actions)")
+            lua_rule:write("\n\tfor k, v in pairs(events_table) do")
+            lua_rule:write("\n\t\tfor k1, v1 in pairs(events_actions[v]) do")
+            lua_rule:write("\n\t\t\tfor k2, v2 in pairs(v1.input_parameters) do")
+            lua_rule:write("\n\t\t\t\tif not utils.table_contains(events_parameters, v2) then")
+            lua_rule:write("\n\t\t\t\t\ttable.insert(events_parameters, v2)")
+            lua_rule:write("\n\t\t\t\tend")
+            lua_rule:write("\n\t\t\tend")
+            lua_rule:write("\n\t\tend")
+            lua_rule:write("\n\tend")
+            lua_rule:write("\nend")
+            lua_rule:write("\nreturn{\n\trule = rule,\n\tpriority = priority,\n\tget_events_parameters = get_events_parameters\n}") 
             lua_rule:close()
 
             --fs.append_to_start(rule_lua_path, "local function rule(req, events)\n\tlog.trace('rule " .. file_name .. " starting to evaluate')") -- upper rule function wrapper
@@ -272,6 +287,7 @@ for k, package_name in pairs(fs.directory_list(packages_path)) do
 
             local rule_require_name = "tmp-lua." .. package_name .. ".rules." .. string.sub(file_name, 0, string.len( file_name ) - 4)
             local rule_require = require(rule_require_name)
+            rule_require.get_events_parameters(events_actions) -- let the rule know which parameters it needs to its events actions
             log.debug("[loading] rule " .. ansicolors('%{underline}' .. rule_require_name))
 
             --table.insert(_G.rules, rule_require)
