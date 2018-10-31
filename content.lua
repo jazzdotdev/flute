@@ -74,6 +74,14 @@ function content.validate_document (header)
   return model:validate(header)
 end
 
+function content.read_document (in_uuid)
+  return content.walk_documents(nil, function (file_uuid, header, body)
+    if file_uuid == in_uuid then
+      return header, body
+    end
+  end)
+end
+
 function content.walk_documents (profile, fn)
 
   -- If no profile was given, walk through all profiles
@@ -87,6 +95,7 @@ function content.walk_documents (profile, fn)
         return table.unpack(results)
       end
     end
+    return
   end
 
   local dir = "content/" .. profile .. "/"
