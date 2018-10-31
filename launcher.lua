@@ -21,9 +21,11 @@ log.info("[loaded] LightTouch")
 
 -- Handler function
 return function (request)
-  events["incoming_request_received"]:trigger(request)
+  local event_parameters = { }
+  event_parameters["request"] = request
+  events["incoming_request_received"]:trigger(event_parameters)
   for k, v in pairs(rules) do
-    v.rule(request, events)
+    v.rule(request)
   end
    
   return response

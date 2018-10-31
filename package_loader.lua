@@ -119,21 +119,21 @@ for k, package_name in pairs (fs.directory_list(packages_path)) do
         action_lua_file:write(" }")
         action_lua_file:write("\nlocal priority = " .. action_yaml_table.priority .. " \n\n")
         action_lua_file:write("local log = require \"log\"\n")
-        action_lua_file:write("local input_parameters = { " .. "\"" .. action_yaml_table.input_parameters[1] .. "\"")
-        for k, v in pairs(action_yaml_table.input_parameters) do
-            if not utils.table_contains(every_events_actions_parameters, v) then table.insert( every_events_actions_parameters, v ) end
-            if k ~= 1 then
-                action_lua_file:write(", \"" .. v .. "\"")
+        if action_yaml_table.input_parameters[1] then
+            action_lua_file:write("local input_parameters = { " .. "\"" .. action_yaml_table.input_parameters[1] .. "\"")
+            for k, v in pairs(action_yaml_table.input_parameters) do
+                if not utils.table_contains(every_events_actions_parameters, v) then table.insert( every_events_actions_parameters, v ) end
+                if k ~= 1 then
+                    action_lua_file:write(", \"" .. v .. "\"")
+                end
             end
+            action_lua_file:write("}\n") 
         end
-        action_lua_file:write("}\n")
-        action_lua_file:write("local function action(" .. action_yaml_table.input_parameters[1]) -- function wrapper
+        action_lua_file:write("local function action(arguments)\n") -- function wrapper
+        
         for k, v in pairs(action_yaml_table.input_parameters) do
-            if k ~= 1 then
-                action_lua_file:write(", " .. v)
-            end
+            action_lua_file:write("\n\tlocal " .. v .. " = " .. "arguments[\"" .. v .. "\"]")
         end
-        action_lua_file:write(")\n")
 
         line_num = 0
 
@@ -155,10 +155,10 @@ for k, package_name in pairs (fs.directory_list(packages_path)) do
             if event then
                 table.insert( events_actions[v], action_require )
                 local action = event:addAction(
-                    function(req) -- ISSUE: we have to declare here as much arguments as the action needs(maybe do a table of arguments?)
+                    function(action_arguments) -- ISSUE: we have to declare here as much arguments as the action needs(maybe do a table of arguments?)
                         log.debug("[running] action " .. ansicolors('%{underline}' .. file_name) .. " with priority " .. action_yaml_table.priority )
                         -- TODO: figure out what to do if more than one responses are returned
-                        possibleResponse = action_require.action(req)
+                        possibleResponse = action_require.action(action_arguments)
                         if possibleResponse ~= nil then
                             if possibleResponse.body ~= nil then
                                 _G.response = possibleResponse
@@ -239,7 +239,17 @@ for k, package_name in pairs(fs.directory_list(packages_path)) do
             end
             lua_rule:write(")")
             lua_rule:write("\n\tlog.debug('[Rule] " .. ansicolors('%{underline}' .. file_name) .. " with priority " .. priority .. " starting to evaluate')")
-            
+            lua_rule:write("\n\tlocal arguments_strings_dictionary = { }")
+            lua_rule:write("\n\targuments_strings_dictionary[\"" .. rule_yaml_table.input_parameter .. "\"] = " .. rule_yaml_table.input_parameter)
+            for k, v in pairs (every_events_actions_parameters) do -- matching rule arguments with action required parameters, so events_parameters["p1"] = p1
+                if v ~= rule_yaml_table.input_parameter then 
+                    lua_rule:write("\n\targuments_strings_dictionary[\"" .. v .. "\"] = " .. v)
+                end
+            end
+
+            lua_rule:write("\n\tfor k, v in pairs(events_parameters) do")
+            lua_rule:write("\n\tevents_parameters[k] = arguments_strings_dictionary[k]")
+            lua_rule:write("\nend")
             line_num = 0
             for line in io.lines(rule_path) do
                 line_num = line_num + 1
@@ -255,13 +265,14 @@ for k, package_name in pairs(fs.directory_list(packages_path)) do
             lua_rule:write("\n\tfor k, v in pairs(events_table) do")
             lua_rule:write("\n\t\tfor k1, v1 in pairs(events_actions[v]) do")
             lua_rule:write("\n\t\t\tfor k2, v2 in pairs(v1.input_parameters) do")
-            lua_rule:write("\n\t\t\t\tif not utils.table_contains(events_parameters, v2) then")
-            lua_rule:write("\n\t\t\t\t\ttable.insert(events_parameters, v2)")
+            lua_rule:write("\n\t\t\t\tif not events_parameters[v2] then")
+            lua_rule:write("\n\t\t\t\t\tevents_parameters[v2] = \" \"")
             lua_rule:write("\n\t\t\t\tend")
             lua_rule:write("\n\t\t\tend")
             lua_rule:write("\n\t\tend")
             lua_rule:write("\n\tend")
             lua_rule:write("\nend")
+
             lua_rule:write("\nreturn{\n\trule = rule,\n\tpriority = priority,\n\tget_events_parameters = get_events_parameters\n}") 
             lua_rule:close()
 
