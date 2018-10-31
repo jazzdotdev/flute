@@ -6,6 +6,7 @@
 
 local log = require "log"
 local ansicolors = require 'third-party.ansicolors'
+local every_events_actions_parameters = { }
 
 local function table_contains(tab, val)
     for k, v in pairs(tab) do
@@ -146,8 +147,6 @@ for k, package_name in pairs (fs.directory_list(packages_path)) do
         return false
     end
     -- actions loader
-
-    local every_events_actions_parameters = { }
     
     local actions_path = package_path .. "actions/"
     local action_files = {} -- actions path is optional
@@ -235,6 +234,11 @@ for k, package_name in pairs (fs.directory_list(packages_path)) do
     end
 
     log.trace("[patched] actions for package " .. ansicolors('%{underline}' .. package_name))
+end
+
+for k, v in pairs(every_events_actions_parameters) do
+    log.debug(k)
+    log.debug(v)
 end
 
 -- interpreted rules loading
