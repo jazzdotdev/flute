@@ -7,6 +7,13 @@
 local log = require "log"
 local ansicolors = require 'third-party.ansicolors'
 
+local function table_contains(tab, val)
+    for k, v in pairs(tab) do
+        if v == val then return true end
+    end
+    return false
+end
+
 _G.rules = {} -- rules table to store them from all packages
 _G.rules_priorities = {} -- table to store priorities of rules, so we can sort _G.rules table later by these priorities
 _G.events = { } -- events table
@@ -53,7 +60,7 @@ for k, package_name in pairs(fs.directory_list(packages_path)) do
             for line in io.lines(rule_path) do
                 line_num = line_num + 1        
                 rule_yaml = rule_yaml .. line .. "\n" -- get only yaml lines
-                if line_num == 1 then break end
+                if line_num == 2 then break end
             end
 
             rule_yaml_table = yaml.to_table(rule_yaml)
@@ -68,12 +75,13 @@ for k, package_name in pairs(fs.directory_list(packages_path)) do
             
             lua_rule:write("local log = require \"log\"\n")
             lua_rule:write("local priority = " .. priority)
+            lua_rule:write("\nlocal input_parameter = " .. rule_yaml_table.input_parameter)
             lua_rule:write("\nlocal function rule(request, events)\n\tlog.debug('[Rule] " .. ansicolors('%{underline}' .. file_name) .. " with priority " .. priority .. " starting to evaluate')")
             
             line_num = 0
             for line in io.lines(rule_path) do
                 line_num = line_num + 1
-                if line_num >= 2 then
+                if line_num > 2 then
                     lua_rule:write("\n\t" .. line)
                 end
             end
@@ -138,6 +146,8 @@ for k, package_name in pairs (fs.directory_list(packages_path)) do
         return false
     end
     -- actions loader
+
+    local every_events_actions_parameters = { }
     
     local actions_path = package_path .. "actions/"
     local action_files = {} -- actions path is optional
@@ -155,7 +165,7 @@ for k, package_name in pairs (fs.directory_list(packages_path)) do
         for line in io.lines(packages_path .. "/" .. package_name .. "/actions/" .. file_name) do
             line_num = line_num + 1        
             action_yaml = action_yaml .. line .. "\n" -- get only yaml lines
-            if line_num == 2 then break end
+            if line_num == 3 then break end
         end
         action_yaml_table = yaml.to_table(action_yaml) -- decode yaml to lua table
         local action_lua_file = assert(io.open("tmp-lua/" .. package_name .. "/actions/" .. file_name, "w+")) -- w+ to override old files
@@ -170,13 +180,21 @@ for k, package_name in pairs (fs.directory_list(packages_path)) do
         action_lua_file:write(" }")
         action_lua_file:write("\nlocal priority = " .. action_yaml_table.priority .. " \n\n")
         action_lua_file:write("local log = require \"log\"\n")
+        action_lua_file:write("local input_parameters = { " .. action_yaml_table.input_parameters[1])
+        for k, v in pairs(action_yaml_table.input_parameters) do
+            if not table_contains(every_events_actions_parameters, v) then table.insert( every_events_actions_parameters, v ) end
+            if k ~= 1 then
+                action_lua_file:write(", " .. v)
+            end
+        end
+        action_lua_file:write("}\n")
         action_lua_file:write("local function action(request)\n") -- function wrapper
 
         line_num = 0
 
         for line in io.lines(packages_path .. "/" .. package_name .. "/actions/" .. file_name) do
             line_num = line_num + 1
-            if line_num > 2 then
+            if line_num > 3 then
                 action_lua_file:write(line .. "\n\t")
             end
         end
