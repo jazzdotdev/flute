@@ -187,7 +187,13 @@ for k, package_name in pairs (fs.directory_list(packages_path)) do
             end
         end
         action_lua_file:write("}\n")
-        action_lua_file:write("local function action(request)\n") -- function wrapper
+        action_lua_file:write("local function action(" .. action_yaml_table.input_parameters[1]) -- function wrapper
+        for k, v in pairs(action_yaml_table.input_parameters) do
+            if k ~= 1 then
+                action_lua_file:write(", " .. v)
+            end
+        end
+        action_lua_file:write(")\n")
 
         line_num = 0
 
