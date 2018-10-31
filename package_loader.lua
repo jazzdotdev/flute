@@ -206,7 +206,7 @@ for k, package_name in pairs(fs.directory_list(packages_path)) do
             for line in io.lines(rule_path) do
                 line_num = line_num + 1        
                 rule_yaml = rule_yaml .. line .. "\n" -- get only yaml lines
-                if line_num == 2 then break end
+                if line_num == 3 then break end
             end
 
             rule_yaml_table = yaml.to_table(rule_yaml)
@@ -221,6 +221,13 @@ for k, package_name in pairs(fs.directory_list(packages_path)) do
             
             lua_rule:write("local log = require \"log\"\n")
             lua_rule:write("local priority = " .. priority)
+            lua_rule:write("\nlocal events_table = { " .. "\"" .. rule_yaml_table.events_table[1] .. "\"")
+            for k, v in pairs(rule_yaml_table.events_table) do
+                if k ~= 1 then
+                    lua_rule:write(", " .. "\"" .. v .. "\"")
+                end
+            end
+            lua_rule:write("}")
             lua_rule:write("\nlocal input_parameter = \"" .. rule_yaml_table.input_parameter .. "\"")
             lua_rule:write("\nlocal function rule(" .. rule_yaml_table.input_parameter)
             for k, v in pairs (every_events_actions_parameters) do
@@ -234,7 +241,7 @@ for k, package_name in pairs(fs.directory_list(packages_path)) do
             line_num = 0
             for line in io.lines(rule_path) do
                 line_num = line_num + 1
-                if line_num > 2 then
+                if line_num > 3 then
                     lua_rule:write("\n\t" .. line)
                 end
             end
@@ -249,11 +256,6 @@ for k, package_name in pairs(fs.directory_list(packages_path)) do
     end
 end
 ---
-
-for k, v in pairs(every_events_actions_parameters) do
-    log.debug(k)
-    log.debug(v)
-end
 
 -- interpreted rules loading
 for k, package_name in pairs(fs.directory_list(packages_path)) do
