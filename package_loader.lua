@@ -39,65 +39,6 @@ request_process_event:addAction(request_process_action)
 request_process_event:setActionPriority(request_process_action, 100)
 
 
--- rule interpretter
-for k, package_name in pairs(fs.directory_list(packages_path)) do
-    fs.create_dir("tmp-lua/" .. package_name .. "/rules/", true)
-    local rules_path = packages_path .. "/".. package_name .. "/rules/"
-    local rule_files = {} -- get all rules from this package
-    -- Rules path is optional
-    if fs.exists(rules_path) then
-        rule_files = fs.get_all_files_in(rules_path)
-    end
-    
-    for _, file_name in ipairs(rule_files) do
-        if file_name ~= "lua_files/" then
-            local rule_lua_path = "tmp-lua/" .. package_name .. "/" .. "rules/" .. file_name
-            local rule_path = rules_path .. file_name
-            log.trace("[patching] rule " .. ansicolors('%{underline}' .. file_name))
-
-            local rule_yaml = ""
-            local rule_yaml_table
-            local line_num = 0
-            for line in io.lines(rule_path) do
-                line_num = line_num + 1        
-                rule_yaml = rule_yaml .. line .. "\n" -- get only yaml lines
-                if line_num == 2 then break end
-            end
-
-            rule_yaml_table = yaml.to_table(rule_yaml)
-
-            -- rule priority cannot be higher than 100
-
-            local priority = rule_yaml_table.priority or 1
-            if priority > 100 then priority = 100 end
-
-            --fs.copy(rule_path, rule_lua_path)
-            local lua_rule = assert(io.open(rule_lua_path, "w+"))
-            
-            lua_rule:write("local log = require \"log\"\n")
-            lua_rule:write("local priority = " .. priority)
-            lua_rule:write("\nlocal input_parameter = " .. rule_yaml_table.input_parameter)
-            lua_rule:write("\nlocal function rule(request, events)\n\tlog.debug('[Rule] " .. ansicolors('%{underline}' .. file_name) .. " with priority " .. priority .. " starting to evaluate')")
-            
-            line_num = 0
-            for line in io.lines(rule_path) do
-                line_num = line_num + 1
-                if line_num > 2 then
-                    lua_rule:write("\n\t" .. line)
-                end
-            end
-
-            lua_rule:write("\n\tlog.debug('[Rule] " .. ansicolors('%{underline}' .. file_name) .. " evaluated succesfully')")
-            lua_rule:write("\nend\nreturn{\n\trule = rule,\npriority = priority}") -- bottom rule function wrapper
-            lua_rule:close()
-
-            --fs.append_to_start(rule_lua_path, "local function rule(req, events)\n\tlog.trace('rule " .. file_name .. " starting to evaluate')") -- upper rule function wrapper
-
-        end
-    end
-end
----
-
 for k, package_name in pairs (fs.directory_list(packages_path)) do
     local package_path = packages_path .. "/" .. package_name .. "/"
 
@@ -179,11 +120,11 @@ for k, package_name in pairs (fs.directory_list(packages_path)) do
         action_lua_file:write(" }")
         action_lua_file:write("\nlocal priority = " .. action_yaml_table.priority .. " \n\n")
         action_lua_file:write("local log = require \"log\"\n")
-        action_lua_file:write("local input_parameters = { " .. action_yaml_table.input_parameters[1])
+        action_lua_file:write("local input_parameters = { " .. "\"" .. action_yaml_table.input_parameters[1] .. "\"")
         for k, v in pairs(action_yaml_table.input_parameters) do
             if not table_contains(every_events_actions_parameters, v) then table.insert( every_events_actions_parameters, v ) end
             if k ~= 1 then
-                action_lua_file:write(", " .. v)
+                action_lua_file:write(", \"" .. v .. "\"")
             end
         end
         action_lua_file:write("}\n")
@@ -214,7 +155,7 @@ for k, package_name in pairs (fs.directory_list(packages_path)) do
             local event = _G.events[v]
             if event then
                 local action = event:addAction(
-                    function(req)
+                    function(req) -- ISSUE: we have to declare here as much arguments as the action needs(maybe do a table of arguments?)
                         log.debug("[running] action " .. ansicolors('%{underline}' .. file_name) .. " with priority " .. action_yaml_table.priority )
                         -- TODO: figure out what to do if more than one responses are returned
                         possibleResponse = action_require.action(req)
@@ -241,6 +182,73 @@ for k, package_name in pairs (fs.directory_list(packages_path)) do
 
     log.trace("[patched] actions for package " .. ansicolors('%{underline}' .. package_name))
 end
+-- 
+
+-- rule interpretter
+for k, package_name in pairs(fs.directory_list(packages_path)) do
+    fs.create_dir("tmp-lua/" .. package_name .. "/rules/", true)
+    local rules_path = packages_path .. "/".. package_name .. "/rules/"
+    local rule_files = {} -- get all rules from this package
+    -- Rules path is optional
+    if fs.exists(rules_path) then
+        rule_files = fs.get_all_files_in(rules_path)
+    end
+    
+    for _, file_name in ipairs(rule_files) do
+        if file_name ~= "lua_files/" then
+            local rule_lua_path = "tmp-lua/" .. package_name .. "/" .. "rules/" .. file_name
+            local rule_path = rules_path .. file_name
+            log.trace("[patching] rule " .. ansicolors('%{underline}' .. file_name))
+
+            local rule_yaml = ""
+            local rule_yaml_table
+            local line_num = 0
+            for line in io.lines(rule_path) do
+                line_num = line_num + 1        
+                rule_yaml = rule_yaml .. line .. "\n" -- get only yaml lines
+                if line_num == 2 then break end
+            end
+
+            rule_yaml_table = yaml.to_table(rule_yaml)
+
+            -- rule priority cannot be higher than 100
+
+            local priority = rule_yaml_table.priority or 1
+            if priority > 100 then priority = 100 end
+
+            --fs.copy(rule_path, rule_lua_path)
+            local lua_rule = assert(io.open(rule_lua_path, "w+"))
+            
+            lua_rule:write("local log = require \"log\"\n")
+            lua_rule:write("local priority = " .. priority)
+            lua_rule:write("\nlocal input_parameter = \"" .. rule_yaml_table.input_parameter .. "\"")
+            lua_rule:write("\nlocal function rule(" .. rule_yaml_table.input_parameter .. ", " .. every_events_actions_parameters[1])
+            for k, v in pairs (every_events_actions_parameters) do
+                if k ~= 1 then 
+                    lua_rule:write(", " .. v)
+                end
+            end
+            lua_rule:write(")")
+            lua_rule:write("\n\tlog.debug('[Rule] " .. ansicolors('%{underline}' .. file_name) .. " with priority " .. priority .. " starting to evaluate')")
+            
+            line_num = 0
+            for line in io.lines(rule_path) do
+                line_num = line_num + 1
+                if line_num > 2 then
+                    lua_rule:write("\n\t" .. line)
+                end
+            end
+
+            lua_rule:write("\n\tlog.debug('[Rule] " .. ansicolors('%{underline}' .. file_name) .. " evaluated succesfully')")
+            lua_rule:write("\nend\nreturn{\n\trule = rule,\npriority = priority}") -- bottom rule function wrapper
+            lua_rule:close()
+
+            --fs.append_to_start(rule_lua_path, "local function rule(req, events)\n\tlog.trace('rule " .. file_name .. " starting to evaluate')") -- upper rule function wrapper
+
+        end
+    end
+end
+---
 
 for k, v in pairs(every_events_actions_parameters) do
     log.debug(k)
