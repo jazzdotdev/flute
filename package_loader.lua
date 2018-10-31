@@ -222,9 +222,9 @@ for k, package_name in pairs(fs.directory_list(packages_path)) do
             lua_rule:write("local log = require \"log\"\n")
             lua_rule:write("local priority = " .. priority)
             lua_rule:write("\nlocal input_parameter = \"" .. rule_yaml_table.input_parameter .. "\"")
-            lua_rule:write("\nlocal function rule(" .. rule_yaml_table.input_parameter .. ", " .. every_events_actions_parameters[1])
+            lua_rule:write("\nlocal function rule(" .. rule_yaml_table.input_parameter)
             for k, v in pairs (every_events_actions_parameters) do
-                if k ~= 1 then 
+                if v ~= rule_yaml_table.input_parameter then 
                     lua_rule:write(", " .. v)
                 end
             end
