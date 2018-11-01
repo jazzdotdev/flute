@@ -1,5 +1,19 @@
 log.debug("[loading] libraries")
 
+math.randomseed(os.time())
+
+_G.inspect = require "third-party.inspect"
+
+-- https://github.com/kyren/rlua/issues/99
+function math.pow (b, n)
+  local r = 1
+  for _ = 1, n do
+    r = r*b
+  end
+  return r
+end
+
+require "third-party.base64"
 _G.luvent = require "third-party.Luvent"
 _G.fs = require "fs"
 
