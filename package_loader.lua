@@ -19,9 +19,9 @@ local packages_path_length = #packages_path_modules
 -- require "lighttouch-libs.actions.create_key"
 package.path = package.path..";./packages/?.lua"
 
+events["lighttouch_loaded"] = luvent.newEvent()
+
 local request_process_event = luvent.newEvent()
-events["incoming_request_received"] = request_process_event
-events["outgoing_response_about_to_be_sent"] = luvent.newEvent()
 function request_process_action ()
     log.trace("\tNew request received") -- temporary it can be here
     local request = ctx.msg
@@ -29,6 +29,9 @@ function request_process_action ()
 end
 request_process_event:addAction(request_process_action)
 request_process_event:setActionPriority(request_process_action, 100)
+events["incoming_request_received"] = request_process_event
+
+events["outgoing_response_about_to_be_sent"] = luvent.newEvent()
 
 
 -- rule interpretter

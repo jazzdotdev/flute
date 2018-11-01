@@ -32,6 +32,8 @@ require "package_loader"
 
 log.info("[loaded] LightTouch")
 
+events["lighttouch_loaded"]:trigger()
+
 
 -- Handler function
 return function (request)
