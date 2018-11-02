@@ -248,8 +248,9 @@ for k, package_name in pairs(fs.directory_list(packages_path)) do
             end
 
             lua_rule:write("\n\tfor k, v in pairs(events_parameters) do")
-            lua_rule:write("\n\tevents_parameters[k] = arguments_strings_dictionary[k]")
-            lua_rule:write("\nend")
+            lua_rule:write("\n\t\tevents_parameters[k] = arguments_strings_dictionary[k]")
+            lua_rule:write("\n\tend")
+            lua_rule:write("\n\tif")
             line_num = 0
             for line in io.lines(rule_path) do
                 line_num = line_num + 1
@@ -257,6 +258,11 @@ for k, package_name in pairs(fs.directory_list(packages_path)) do
                     lua_rule:write("\n\t" .. line)
                 end
             end
+            lua_rule:write("\n\tthen")
+            lua_rule:write("\n\t\tfor k, v in pairs(events_table) do")
+            lua_rule:write("\n\t\t\tevents[v]:trigger(events_parameters)")
+            lua_rule:write("\n\t\tend")
+            lua_rule:write("\n\tend")
 
             lua_rule:write("\n\tlog.debug('[Rule] " .. ansicolors('%{underline}' .. file_name) .. " evaluated succesfully')")
             lua_rule:write("\nend\n") -- bottom rule function wrapper
