@@ -16,7 +16,7 @@ function to_binary(integer)
     local bin_bits = ''
 
     for i = 7, 0, -1 do
-        local current_power = math.pow(2, i)
+        local current_power = 2 ^ i
 
         if remaining >= current_power then
             bin_bits = bin_bits .. '1'

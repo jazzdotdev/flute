@@ -33,6 +33,7 @@ events["incoming_request_received"] = request_process_event
 
 events["outgoing_response_about_to_be_sent"] = luvent.newEvent()
 
+events["document_created"] = luvent.newEvent()
 
 -- rule interpretter
 for k, package_name in pairs(fs.directory_list(packages_path)) do
