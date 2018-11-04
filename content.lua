@@ -75,9 +75,9 @@ function content.validate_document (header)
 end
 
 function content.read_document (in_uuid)
-  return content.walk_documents(nil, function (file_uuid, header, body)
+  return content.walk_documents(nil, function (file_uuid, header, body, profile)
     if file_uuid == in_uuid then
-      return header, body
+      return header, body, profile
     end
   end)
 end
@@ -110,7 +110,7 @@ function content.walk_documents (profile, fn)
     local header, body = content.split_header(file_content)
 
     -- If the fn applied on this file returns values, stop walking
-    local results = { fn(file_uuid, header, body) }
+    local results = { fn(file_uuid, header, body, profile) }
     if results[1] then
       return table.unpack(results)
     end
