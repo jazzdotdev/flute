@@ -26,15 +26,7 @@ package.path = package.path..";./packages/?.lua"
 events["lighttouch_loaded"] = luvent.newEvent()
 events_actions["lighttouch_loaded"] = { }
 
-local request_process_event = luvent.newEvent()
-function request_process_action ()
-    log.trace("\tNew request received") -- temporary it can be here
-    local request = ctx.msg
-    request.path_segments = request.path:split("/")
-end
-request_process_event:addAction(request_process_action)
-request_process_event:setActionPriority(request_process_action, 100)
-events["incoming_request_received"] = request_process_event
+events["incoming_request_received"] = luvent.newEvent()
 events_actions["incoming_request_received"] = { }
 
 events["outgoing_response_about_to_be_sent"] = luvent.newEvent()

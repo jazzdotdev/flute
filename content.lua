@@ -128,6 +128,13 @@ function content.write_file (profile, file_uuid, header, body)
   end
   file:write(body)
   file:close()
+
+  events["document_created"]:trigger({
+    profile_uuid = profile,
+    file_uuid = file_uuid,
+    fields = header,
+    body = body
+  })
 end
 
 return content

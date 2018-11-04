@@ -21,6 +21,18 @@ _G.keys = require "keys"
 
 require "package_loader"
 
+local request_event = events["incoming_request_received"]
+function request_process_action ()
+    local request_uuid = uuid.v4()
+    log.info("\tNew request received: " .. request_uuid)
+
+    local request = ctx.msg
+    request.path_segments = request.path:split("/")
+    request.uuid = request_uuid
+end
+request_event:addAction(request_process_action)
+request_event:setActionPriority(request_process_action, 100)
+
 log.info("[loaded] LightTouch")
 
 events["lighttouch_loaded"]:trigger()
