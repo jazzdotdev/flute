@@ -257,6 +257,7 @@ for k, package_name in pairs(fs.directory_list(packages_path)) do
                 end
             end
             lua_rule:write("\n\tthen")
+            lua_rule:write("\n\t\tlog.trace(\"Rule " .. ansicolors('%{underline}' .. file_name) .. " evaluated as TRUE\")")
             lua_rule:write("\n\t\tfor k, v in pairs(events_table) do")
             lua_rule:write("\n\t\t\tevents[v]:trigger(events_parameters)")
             lua_rule:write("\n\t\tend")
