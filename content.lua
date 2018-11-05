@@ -1,5 +1,7 @@
 
-local content = {}
+local content = {
+  stores = {}
+}
 
 function content.split_header (document_text)
     local yaml_text, body = document_text:match("(.-)\n%.%.%.*\n?(.*)")
@@ -74,6 +76,19 @@ function content.validate_document (header)
   return model:validate(header)
 end
 
+-- Returns the path of the given document. A document can be found without
+-- giving the store it's in, but it's a lot slower because all store
+-- directories have to be searched
+function content.get_document_path (doc_uuid, store_id)
+  if store_id then
+    return (content.stores[store_id] or "content/" .. store_id) .. doc_uuid
+  else
+    for store_id, dir in content.stores_iter() do
+
+    end
+  end
+end
+
 function content.read_document (in_uuid)
   return content.walk_documents(nil, function (file_uuid, header, body, profile)
     if file_uuid == in_uuid then
@@ -82,26 +97,43 @@ function content.read_document (in_uuid)
   end)
 end
 
-function content.walk_documents (profile, fn)
+function content.documents (store_id)
+  if store_id then
+    local dir = content.stores[store_id]
 
-  -- If no profile was given, walk through all profiles
-  if not profile then
-    local profiles = fs.directory_list("content/")
-    for _, profile in ipairs(profiles) do
+    local f = fs.entries(dir)
 
-      -- If this profile returns values, stop walking
-      local results = { content.walk_documents(profile, fn) }
-      if results[1] then
-        return table.unpack(results)
+    return function ()
+      local entry = f()
+      if entry then
+        return entry, store_id
       end
     end
-    return
+  else
+
+    local docs_co = coroutine.create(function ()
+      for store_id, dir in pairs(content.stores) do
+        for entry in fs.entries(dir) do
+          coroutine.yield(entry, store_id)
+        end
+      end
+    end)
+
+    return function ()
+      local cont, uuid, store_id = coroutine.resume(docs_co)
+      if cont then
+        return uuid, store_id
+      end
+    end
+
   end
+end
 
-  local dir = "content/" .. profile .. "/"
+-- DEPRECATED
+function content.walk_documents (_store_id, fn)
+  for doc_id, store_id in content.documents(_store_id) do
 
-  for _, file_uuid in ipairs(fs.get_all_files_in(dir)) do
-    local path = dir .. file_uuid
+    local path = content.stores[store_id] .. doc_id
     local file_content = fs.read_file(path)
     if not file_content then
       log.error("could not open " .. path)
@@ -110,16 +142,20 @@ function content.walk_documents (profile, fn)
     local header, body = content.split_header(file_content)
 
     -- If the fn applied on this file returns values, stop walking
-    local results = { fn(file_uuid, header, body, profile) }
+    local results = { fn(doc_id, header, body, store_id) }
     if results[1] then
       return table.unpack(results)
     end
   end
 end
 
-function content.write_file (profile, file_uuid, header, body)
-  local dir = "content/" .. profile .. "/"
-  fs.create_dir(dir, true)
+function content.write_file (store_id, file_uuid, header, body)
+  local dir = content.stores[store_id]
+  if not dir then
+    dir = "content/" .. store_id .. "/"
+    fs.create_dir(dir, true)
+    content.stores[store_id] = dir
+  end
   local path = dir .. file_uuid
   local body = yaml.from_table(header) .. "\n...\n" .. (body or "")
   local file = io.open(path, "w")
@@ -130,7 +166,7 @@ function content.write_file (profile, file_uuid, header, body)
   file:close()
 
   events["document_created"]:trigger({
-    profile_uuid = profile,
+    store_id = store_id,
     file_uuid = file_uuid,
     fields = header,
     body = body
@@ -150,6 +186,13 @@ function content.read_log (log_uuid)
     end
 
     return yaml.to_table(file_content)
+  end
+end
+
+-- Add all directories in content to the stores table
+for entry in fs.entries("content/") do
+  if fs.metadata("content/" .. entry).type == "directory" then
+    content.stores[entry] = "content/" .. entry .. "/"
   end
 end
 
