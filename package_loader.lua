@@ -4,6 +4,26 @@
 -- foreach dir create specific path to events.txt, disabled_actions.txt, rules and actions
 -- 'trigger' the loaders
 
+-- package.searchers test
+-- package.searchers[2] - function for processing required module
+    local default_package_searchers2 = package.searchers[2]
+    package.searchers[2] = function(name) 
+        if string.match( name, "rules") then
+            print(name) -- interpretate rule code and return it
+            return default_package_searchers2(name) -- tmp for now / it'll be deleted
+
+        elseif string.match( name, "actions" ) then
+            print(name) -- interpretate action code and return it
+            return default_package_searchers2(name) -- tmp for now / it'll be deleted
+
+        else
+            print(name) -- else default return so it won't change code of other modules (f.e. log or ansicolors)
+            return default_package_searchers2(name)
+        end
+
+    end
+--
+
 local log = require "log"
 local ansicolors = require 'third-party.ansicolors'
 local every_events_actions_parameters = { }
