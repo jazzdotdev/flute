@@ -35,6 +35,12 @@ events_actions["outgoing_response_about_to_be_sent"] = { }
 events["document_created"] = luvent.newEvent()
 events_actions["document_created"] = { }
 
+events["incoming_response_received"] = luvent.newEvent()
+events_actions["incoming_response_received"] = { }
+
+events["outgoing_request_about_to_be_sent"] = luvent.newEvent()
+events_actions["outgoing_request_about_to_be_sent"] = { }
+
 for k, package_name in pairs (fs.directory_list(packages_path)) do
     local package_path = packages_path .. "/" .. package_name .. "/"
 

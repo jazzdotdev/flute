@@ -22,7 +22,7 @@ _G.keys = require "keys"
 require "package_loader"
 
 local request_event = events["incoming_request_received"]
-function request_process_action ()
+local function request_process_action ()
     local request_uuid = uuid.v4()
     log.info("\tNew request received: " .. request_uuid)
 
@@ -32,6 +32,20 @@ function request_process_action ()
 end
 request_event:addAction(request_process_action)
 request_event:setActionPriority(request_process_action, 100)
+
+function _G.send_request (request)
+
+  if type(request) == "string" then
+    request = {uri = request}
+  end
+
+  events["outgoing_request_about_to_be_sent"]:trigger({ request = request })
+
+  local response = client_request.send(request)
+
+  events["incoming_response_received"]:trigger({ response = response })
+  
+end
 
 log.info("[loaded] LightTouch")
 
