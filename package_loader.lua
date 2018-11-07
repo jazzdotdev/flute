@@ -9,12 +9,23 @@
     local default_package_searchers2 = package.searchers[2]
     package.searchers[2] = function(name) 
         if string.match( name, "rules") then
-            print(name) -- interpretate rule code and return it
-            return default_package_searchers2(name) -- tmp for now / it'll be deleted
+            print("name " .. name) -- interpretate rule code and return it
+            local file_path = package.searchpath(name, "?.lua")
+            local pure_file_io = io.open(file_path)
+            pure_file_io:write("\n\n-- rule loaded with custom loader")
+            local pure_file = loadfile(file_path)
+            return pure_file
+            --return default_package_searchers2(name) -- tmp for now / it'll be deleted
 
         elseif string.match( name, "actions" ) then
             print(name) -- interpretate action code and return it
-            return default_package_searchers2(name) -- tmp for now / it'll be deleted
+            local file_path = package.searchpath(name, "?.lua")
+            local pure_file_io = io.open(file_path)
+            pure_file_io:write("\n\n action loaded with custom loader")
+            pure_file_io:close()
+            local pure_file = loadfile(file_path)
+            return pure_file
+            --return default_package_searchers2(name) -- tmp for now / it'll be deleted
 
         else
             print(name) -- else default return so it won't change code of other modules (f.e. log or ansicolors)
