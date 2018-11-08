@@ -1,3 +1,8 @@
+
+local address = torchbear.settings.address or "localhost"
+local host = torchbear.settings.host or "3000"
+log.info("started web server on " .. address .. ":" .. host)
+
 log.debug("[loading] libraries")
 
 math.randomseed(os.time())
