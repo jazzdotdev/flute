@@ -6,6 +6,13 @@
 
 -- package.searchers test
 -- package.searchers[2] - function for processing required module
+
+    package.preload["awdgb"] = function(name) print('test', name) end
+
+    require "awdgb"
+
+    -- so i have to change package.preload[reqire_path] to change file while loading
+
     local default_package_searchers2 = package.searchers[2]
     package.searchers[2] = function(name) 
         if string.match( name, "rules") then
@@ -18,13 +25,21 @@
             --return default_package_searchers2(name) -- tmp for now / it'll be deleted
 
         elseif string.match( name, "actions" ) then
-            print(name) -- interpretate action code and return it
-            local file_path = package.searchpath(name, "?.lua")
-            local pure_file_io = io.open(file_path)
-            pure_file_io:write("\n\n action loaded with custom loader")
-            pure_file_io:close()
-            local pure_file = loadfile(file_path)
-            return pure_file
+            package.preload[name] = function(modulename)
+                log.warn("custom require")
+                local modulepath = string.gsub(modulename, "%.", "/")
+                for path in string.gmatch(package.path, "([^;]+)") do
+                  local filename = string.gsub(path, "%?", modulepath)
+                  local file = io.open(filename, "rb")
+                  if file then
+                    -- Compile and return the module
+                    return assert(load(assert(file:read("*a")), filename))
+                  end
+                end
+            end
+
+            return require(name)
+            
             --return default_package_searchers2(name) -- tmp for now / it'll be deleted
 
         else
