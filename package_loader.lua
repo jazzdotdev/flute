@@ -4,6 +4,7 @@
 -- foreach dir create specific path to events.txt, disabled_actions.txt, rules and actions
 -- 'trigger' the loaders
 
+<<<<<<< HEAD
 -- package.searchers test
 -- package.searchers[2] - function for processing required module
 
@@ -117,6 +118,26 @@
 --
 
 
+=======
+local log = require "log"
+local ansicolors = require 'third-party.ansicolors'
+local every_events_actions_parameters = { }
+local events_actions = { } -- events_actions["event_name"] = { event_action1_req, event_action2_req, ... etc. }
+
+local utils = require "utils"
+
+_G.rules = {} -- rules table to store them from all packages
+_G.rules_priorities = {} -- table to store priorities of rules, so we can sort _G.rules table later by these priorities
+_G.events = { } -- events table
+local packages_path = "packages" -- directory where packages are stored
+-- Splitting packages path to easier determine the name of current package later
+local packages_path_modules = packages_path:split( "/" )
+local packages_path_length = #packages_path_modules
+-- Adds the packages into the lua search path, so that a package's content
+-- can be required using it's name as if it was a lua module, ej:
+-- require "lighttouch-libs.actions.create_key"
+package.path = package.path..";./packages/?.lua"
+>>>>>>> parent of 0a4223b... Merge remote-tracking branch 'upstream/master' into better-monkey-patching
 
 events["lighttouch_loaded"] = luvent.newEvent()
 events_actions["lighttouch_loaded"] = { }
@@ -359,12 +380,9 @@ for k, package_name in pairs(fs.directory_list(packages_path)) do
                 end
             end
             lua_rule:write("\n\tthen")
-            lua_rule:write("\n\t\tlog.trace(\"Rule " .. ansicolors('%{underline}' .. file_name) .. " evaluated as TRUE \")")
             lua_rule:write("\n\t\tfor k, v in pairs(events_table) do")
             lua_rule:write("\n\t\t\tevents[v]:trigger(events_parameters)")
             lua_rule:write("\n\t\tend")
-            lua_rule:write("\n\telse")
-            lua_rule:write("\n\t\tlog.trace(\"Rule " .. ansicolors('%{underline}' .. file_name) .. " evaluated as FALSE \")")
             lua_rule:write("\n\tend")
 
             lua_rule:write("\n\tlog.debug('[Rule] " .. ansicolors('%{underline}' .. file_name) .. " evaluated succesfully')")
