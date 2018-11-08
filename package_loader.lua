@@ -4,28 +4,8 @@
 -- foreach dir create specific path to events.txt, disabled_actions.txt, rules and actions
 -- 'trigger' the loaders
 
-<<<<<<< HEAD
 -- package.searchers test
 -- package.searchers[2] - function for processing required module
-
-    local utils = require "utils"
-    local log = require "log"
-    local ansicolors = require 'third-party.ansicolors'
-    local every_events_actions_parameters = { }
-    local events_actions = { } -- events_actions["event_name"] = { event_action1_req, event_action2_req, ... etc. }
-
-
-    _G.rules = {} -- rules table to store them from all packages
-    _G.rules_priorities = {} -- table to store priorities of rules, so we can sort _G.rules table later by these priorities
-    _G.events = { } -- events table
-    local packages_path = "packages" -- directory where packages are stored
-    -- Splitting packages path to easier determine the name of current package later
-    local packages_path_modules = packages_path:split( "/" )
-    local packages_path_length = #packages_path_modules
-    -- Adds the packages into the lua search path, so that a package's content
-    -- can be required using it's name as if it was a lua module, ej:
-    -- require "lighttouch-libs.actions.create_key"
-    package.path = package.path..";./packages/?.lua"
 
     package.preload["awdgb"] = function(name) print('test', name) end
 
@@ -52,54 +32,7 @@
                   local filename = string.gsub(path, "%?", modulepath)
                   local file = io.open(filename, "rb")
                   if file then
-                    local action_yaml = ""
-                    local line_num = 0
-            
-                    for line in io.lines(filename) do
-                        line_num = line_num + 1        
-                        action_yaml = action_yaml .. line .. "\n" -- get only yaml lines
-                        if line_num == 3 then break end
-                    end
-                    action_yaml_table = yaml.to_table(action_yaml) -- decode yaml to lua table
-                    --local file = assert(io.open("tmp-lua/" .. package_name .. "/actions/" .. file_name, "w+")) -- w+ to override old files
-                    file:write("local event = { \"" .. action_yaml_table.event[1] .. "\"") -- put values from yaml in lua form
-            
-                    for _, yaml_event in ipairs(action_yaml_table.event) do
-                        if yaml_event ~= action_yaml_table.event[1] then 
-                            file:write(', "' .. yaml_event .. '"') -- put all events to 'local event = { }'
-                        end
-                    end
-            
-                    file:write(" }")
-                    file:write("\nlocal priority = " .. action_yaml_table.priority .. " \n\n")
-                    file:write("local log = require \"log\"\n")
-                    if action_yaml_table.input_parameters[1] then
-                        file:write("local input_parameters = { " .. "\"" .. action_yaml_table.input_parameters[1] .. "\"")
-                        for k, v in pairs(action_yaml_table.input_parameters) do
-                            if not utils.table_contains(every_events_actions_parameters, v) then table.insert( every_events_actions_parameters, v ) end
-                            if k ~= 1 then
-                                file:write(", \"" .. v .. "\"")
-                            end
-                        end
-                        file:write("}\n") 
-                    end
-                    file:write("local function action(arguments)\n") -- function wrapper
-                    
-                    for k, v in pairs(action_yaml_table.input_parameters) do
-                        file:write("\n\tlocal " .. v .. " = " .. "arguments[\"" .. v .. "\"]")
-                    end
-            
-                    line_num = 0
-            
-                    for line in io.lines(filename) do
-                        line_num = line_num + 1
-                        if line_num > 3 then
-                            file:write(line .. "\n\t")
-                        end
-                    end
-            
-                    file:write("\nend\n\nreturn{\n\tevent = event,\n\taction = action,\n\tpriority = priority,\n\tinput_parameters = input_parameters\n}") -- ending return
-                    --file:close()
+                    -- Compile and return the module
                     return assert(load(assert(file:read("*a")), filename))
                   end
                 end
@@ -117,8 +50,6 @@
     end
 --
 
-
-=======
 local log = require "log"
 local ansicolors = require 'third-party.ansicolors'
 local every_events_actions_parameters = { }
@@ -137,7 +68,6 @@ local packages_path_length = #packages_path_modules
 -- can be required using it's name as if it was a lua module, ej:
 -- require "lighttouch-libs.actions.create_key"
 package.path = package.path..";./packages/?.lua"
->>>>>>> parent of 0a4223b... Merge remote-tracking branch 'upstream/master' into better-monkey-patching
 
 events["lighttouch_loaded"] = luvent.newEvent()
 events_actions["lighttouch_loaded"] = { }
@@ -150,12 +80,6 @@ events_actions["outgoing_response_about_to_be_sent"] = { }
 
 events["document_created"] = luvent.newEvent()
 events_actions["document_created"] = { }
-
-events["incoming_response_received"] = luvent.newEvent()
-events_actions["incoming_response_received"] = { }
-
-events["outgoing_request_about_to_be_sent"] = luvent.newEvent()
-events_actions["outgoing_request_about_to_be_sent"] = { }
 
 for k, package_name in pairs (fs.directory_list(packages_path)) do
     local package_path = packages_path .. "/" .. package_name .. "/"
@@ -218,57 +142,56 @@ for k, package_name in pairs (fs.directory_list(packages_path)) do
     for _, file_name in ipairs(action_files) do
         log.trace("[patching] action " .. ansicolors('%{underline}' .. file_name))
         local action_file = assert(io.open(packages_path .. "/" .. package_name .. "/actions/" .. file_name, "r")) -- open yaml / pseudo lua action ifle
-        -- local action_yaml = ""
-        -- local line_num = 0
+        local action_yaml = ""
+        local line_num = 0
 
-        -- for line in io.lines(packages_path .. "/" .. package_name .. "/actions/" .. file_name) do
-        --     line_num = line_num + 1        
-        --     action_yaml = action_yaml .. line .. "\n" -- get only yaml lines
-        --     if line_num == 3 then break end
-        -- end
-        -- action_yaml_table = yaml.to_table(action_yaml) -- decode yaml to lua table
-        -- local action_lua_file = assert(io.open("tmp-lua/" .. package_name .. "/actions/" .. file_name, "w+")) -- w+ to override old files
-        -- action_lua_file:write("local event = { \"" .. action_yaml_table.event[1] .. "\"") -- put values from yaml in lua form
+        for line in io.lines(packages_path .. "/" .. package_name .. "/actions/" .. file_name) do
+            line_num = line_num + 1        
+            action_yaml = action_yaml .. line .. "\n" -- get only yaml lines
+            if line_num == 3 then break end
+        end
+        action_yaml_table = yaml.to_table(action_yaml) -- decode yaml to lua table
+        local action_lua_file = assert(io.open("tmp-lua/" .. package_name .. "/actions/" .. file_name, "w+")) -- w+ to override old files
+        action_lua_file:write("local event = { \"" .. action_yaml_table.event[1] .. "\"") -- put values from yaml in lua form
 
-        -- for _, yaml_event in ipairs(action_yaml_table.event) do
-        --     if yaml_event ~= action_yaml_table.event[1] then 
-        --         action_lua_file:write(', "' .. yaml_event .. '"') -- put all events to 'local event = { }'
-        --     end
-        -- end
+        for _, yaml_event in ipairs(action_yaml_table.event) do
+            if yaml_event ~= action_yaml_table.event[1] then 
+                action_lua_file:write(', "' .. yaml_event .. '"') -- put all events to 'local event = { }'
+            end
+        end
 
-        -- action_lua_file:write(" }")
-        -- action_lua_file:write("\nlocal priority = " .. action_yaml_table.priority .. " \n\n")
-        -- action_lua_file:write("local log = require \"log\"\n")
-        -- if action_yaml_table.input_parameters[1] then
-        --     action_lua_file:write("local input_parameters = { " .. "\"" .. action_yaml_table.input_parameters[1] .. "\"")
-        --     for k, v in pairs(action_yaml_table.input_parameters) do
-        --         if not utils.table_contains(every_events_actions_parameters, v) then table.insert( every_events_actions_parameters, v ) end
-        --         if k ~= 1 then
-        --             action_lua_file:write(", \"" .. v .. "\"")
-        --         end
-        --     end
-        --     action_lua_file:write("}\n") 
-        -- end
-        -- action_lua_file:write("local function action(arguments)\n") -- function wrapper
+        action_lua_file:write(" }")
+        action_lua_file:write("\nlocal priority = " .. action_yaml_table.priority .. " \n\n")
+        action_lua_file:write("local log = require \"log\"\n")
+        if action_yaml_table.input_parameters[1] then
+            action_lua_file:write("local input_parameters = { " .. "\"" .. action_yaml_table.input_parameters[1] .. "\"")
+            for k, v in pairs(action_yaml_table.input_parameters) do
+                if not utils.table_contains(every_events_actions_parameters, v) then table.insert( every_events_actions_parameters, v ) end
+                if k ~= 1 then
+                    action_lua_file:write(", \"" .. v .. "\"")
+                end
+            end
+            action_lua_file:write("}\n") 
+        end
+        action_lua_file:write("local function action(arguments)\n") -- function wrapper
         
-        -- for k, v in pairs(action_yaml_table.input_parameters) do
-        --     action_lua_file:write("\n\tlocal " .. v .. " = " .. "arguments[\"" .. v .. "\"]")
-        -- end
+        for k, v in pairs(action_yaml_table.input_parameters) do
+            action_lua_file:write("\n\tlocal " .. v .. " = " .. "arguments[\"" .. v .. "\"]")
+        end
 
-        -- line_num = 0
+        line_num = 0
 
-        -- for line in io.lines(packages_path .. "/" .. package_name .. "/actions/" .. file_name) do
-        --     line_num = line_num + 1
-        --     if line_num > 3 then
-        --         action_lua_file:write(line .. "\n\t")
-        --     end
-        -- end
+        for line in io.lines(packages_path .. "/" .. package_name .. "/actions/" .. file_name) do
+            line_num = line_num + 1
+            if line_num > 3 then
+                action_lua_file:write(line .. "\n\t")
+            end
+        end
 
-        -- action_lua_file:write("\nend\n\nreturn{\n\tevent = event,\n\taction = action,\n\tpriority = priority,\n\tinput_parameters = input_parameters\n}") -- ending return
-        -- action_lua_file:close()
+        action_lua_file:write("\nend\n\nreturn{\n\tevent = event,\n\taction = action,\n\tpriority = priority,\n\tinput_parameters = input_parameters\n}") -- ending return
+        action_lua_file:close()
 
-        --local action_require_name = "tmp-lua." .. package_name .. ".actions." .. string.sub( file_name, 0, string.len( file_name ) - 4 )
-        local action_require_name = package_name .. ".actions." .. string.sub( file_name, 0, string.len( file_name ) - 4 )
+        local action_require_name = "tmp-lua." .. package_name .. ".actions." .. string.sub( file_name, 0, string.len( file_name ) - 4 )
         local action_require = require(action_require_name)
         
         for k, v in pairs(action_require.event) do
@@ -380,9 +303,12 @@ for k, package_name in pairs(fs.directory_list(packages_path)) do
                 end
             end
             lua_rule:write("\n\tthen")
+            lua_rule:write("\n\t\tlog.trace(\"Rule " .. ansicolors('%{underline}' .. file_name) .. " evaluated as TRUE \")")
             lua_rule:write("\n\t\tfor k, v in pairs(events_table) do")
             lua_rule:write("\n\t\t\tevents[v]:trigger(events_parameters)")
             lua_rule:write("\n\t\tend")
+            lua_rule:write("\n\telse")
+            lua_rule:write("\n\t\tlog.trace(\"Rule " .. ansicolors('%{underline}' .. file_name) .. " evaluated as FALSE \")")
             lua_rule:write("\n\tend")
 
             lua_rule:write("\n\tlog.debug('[Rule] " .. ansicolors('%{underline}' .. file_name) .. " evaluated succesfully')")
@@ -439,4 +365,3 @@ for k,v in sorted_pairs(_G.rules_priorities, function(t,a,b) return t[b] < t[a] 
     table.insert(_G.rules, require(k))
 end
 --
-
