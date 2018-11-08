@@ -9,13 +9,13 @@ log.debug("[loading] libraries")
 
 math.randomseed(os.time())
 
+_G.log = require "third-party.log"
 _G.inspect = require "third-party.inspect"
+_G.luvent = require "third-party.Luvent"
 
 require "third-party.base64"
-_G.luvent = require "third-party.Luvent"
 _G.fs = require "fs"
 
-local log = require "log"
 fs.create_dir("log")
 log.outfile = "log/lighttouch"
 
@@ -28,7 +28,7 @@ _G.keys = require "keys"
 
 require "package_loader"
 
-local request_event = events["incoming_request_received"]
+local incoming_request_event = events["incoming_request_received"]
 local function request_process_action ()
     local request_uuid = uuid.v4()
     log.info("\tNew request received: " .. request_uuid)
@@ -37,8 +37,8 @@ local function request_process_action ()
     request.path_segments = request.path:split("/")
     request.uuid = request_uuid
 end
-request_event:addAction(request_process_action)
-request_event:setActionPriority(request_process_action, 100)
+incoming_request_event:addAction(request_process_action)
+incoming_request_event:setActionPriority(request_process_action, 100)
 
 function _G.send_request (request)
 

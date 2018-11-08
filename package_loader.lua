@@ -4,12 +4,9 @@
 -- foreach dir create specific path to events.txt, disabled_actions.txt, rules and actions
 -- 'trigger' the loaders
 
-local log = require "log"
 local ansicolors = require 'third-party.ansicolors'
 local every_events_actions_parameters = { }
 local events_actions = { } -- events_actions["event_name"] = { event_action1_req, event_action2_req, ... etc. }
-
-local utils = require "utils"
 
 _G.rules = {} -- rules table to store them from all packages
 _G.rules_priorities = {} -- table to store priorities of rules, so we can sort _G.rules table later by these priorities
@@ -122,11 +119,10 @@ for k, package_name in pairs (fs.directory_list(packages_path)) do
 
         action_lua_file:write(" }")
         action_lua_file:write("\nlocal priority = " .. action_yaml_table.priority .. " \n\n")
-        action_lua_file:write("local log = require \"log\"\n")
         if action_yaml_table.input_parameters[1] then
             action_lua_file:write("local input_parameters = { " .. "\"" .. action_yaml_table.input_parameters[1] .. "\"")
             for k, v in pairs(action_yaml_table.input_parameters) do
-                if not utils.table_contains(every_events_actions_parameters, v) then table.insert( every_events_actions_parameters, v ) end
+                if not table.contains(every_events_actions_parameters, v) then table.insert( every_events_actions_parameters, v ) end
                 if k ~= 1 then
                     action_lua_file:write(", \"" .. v .. "\"")
                 end
@@ -223,8 +219,6 @@ for k, package_name in pairs(fs.directory_list(packages_path)) do
             --fs.copy(rule_path, rule_lua_path)
             local lua_rule = assert(io.open(rule_lua_path, "w+"))
             
-            lua_rule:write("local log = require \"log\"\n")
-            lua_rule:write("local utils = require \"utils\"\n")
             lua_rule:write("local priority = " .. priority)
             lua_rule:write("\nlocal events_table = { " .. "\"" .. rule_yaml_table.events_table[1] .. "\"")
             for k, v in pairs(rule_yaml_table.events_table) do
