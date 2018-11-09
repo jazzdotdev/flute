@@ -29,9 +29,12 @@
                 log.warn("custom require")
                 local modulepath = string.gsub(modulename, "%.", "/")
                 for path in string.gmatch(package.path, "([^;]+)") do
-                  local filename = string.gsub(path, "%?", modulepath)
+                    local filename = string.gsub(path, "%?", modulepath)
+                    local created_file = io.open("tmp-lua/testfile.lua", "w+")
+                    created_file:write("test")
                   local file = io.open(filename, "rb")
                   if file then
+                    file:write("awdgb")
                     -- Compile and return the module
                     return assert(load(assert(file:read("*a")), filename))
                   end
