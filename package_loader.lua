@@ -4,59 +4,9 @@
 -- foreach dir create specific path to events.txt, disabled_actions.txt, rules and actions
 -- 'trigger' the loaders
 
-<<<<<<< HEAD
 -- package.searchers test
 -- package.searchers[2] - function for processing required module
-
-    package.preload["awdgb"] = function(name) print('test', name) end
-
-    require "awdgb"
-
-    -- so i have to change package.preload[reqire_path] to change file while loading
-
-    local default_package_searchers2 = package.searchers[2]
-    package.searchers[2] = function(name) 
-        if string.match( name, "rules") then
-            print("name " .. name) -- interpretate rule code and return it
-            local file_path = package.searchpath(name, "?.lua")
-            local pure_file_io = io.open(file_path)
-            pure_file_io:write("\n\n-- rule loaded with custom loader")
-            local pure_file = loadfile(file_path)
-            return pure_file
-            --return default_package_searchers2(name) -- tmp for now / it'll be deleted
-
-        elseif string.match( name, "actions" ) then
-            package.preload[name] = function(modulename)
-                log.warn("custom require")
-                local modulepath = string.gsub(modulename, "%.", "/")
-                for path in string.gmatch(package.path, "([^;]+)") do
-                    local filename = string.gsub(path, "%?", modulepath)
-                    local created_file = io.open("tmp-lua/testfile.lua", "w+")
-                    created_file:write("test")
-                  local file = io.open(filename, "rb")
-                  if file then
-                    file:write("awdgb")
-                    -- Compile and return the module
-                    return assert(load(assert(file:read("*a")), filename))
-                  end
-                end
-            end
-
-            return require(name)
-            
-            --return default_package_searchers2(name) -- tmp for now / it'll be deleted
-
-        else
-            print(name) -- else default return so it won't change code of other modules (f.e. log or ansicolors)
-            return default_package_searchers2(name)
-        end
-
-    end
---
-
-local log = require "log"
-=======
->>>>>>> upstream/master
+local log = require "third-party.log"
 local ansicolors = require 'third-party.ansicolors'
 local every_events_actions_parameters = { }
 local events_actions = { } -- events_actions["event_name"] = { event_action1_req, event_action2_req, ... etc. }
@@ -72,6 +22,55 @@ local packages_path_length = #packages_path_modules
 -- can be required using it's name as if it was a lua module, ej:
 -- require "lighttouch-libs.actions.create_key"
 package.path = package.path..";./packages/?.lua"
+
+package.preload["awdgb"] = function(name) print('test', name) end
+
+require "awdgb"
+
+-- so i have to change package.preload[reqire_path] to change file while loading
+
+local default_package_searchers2 = package.searchers[2]
+package.searchers[2] = function(name) 
+    if string.match( name, "rules") then
+        print("name " .. name) -- interpretate rule code and return it
+        local file_path = package.searchpath(name, "?.lua")
+        local pure_file_io = io.open(file_path)
+        pure_file_io:write("\n\n-- rule loaded with custom loader")
+        local pure_file = loadfile(file_path)
+        return pure_file
+        --return default_package_searchers2(name) -- tmp for now / it'll be deleted
+
+    elseif string.match( name, "actions" ) then
+        package.preload[name] = function(modulename)
+            log.warn("custom require")
+            local modulepath = string.gsub(modulename, "%.", "/")
+            for path in string.gmatch(package.path, "([^;]+)") do
+                local filename = string.gsub(path, "%?", modulepath)
+                local created_file = io.open("tmp-lua/module.lua", "w+")
+                created_file:write("test")
+                local file = io.open(filename, "rb")
+                if file then
+                file:write("")
+                for line in io.lines(modulepath .. ".lua") do
+                    log.debug(line)
+                end
+                -- Compile and return the module
+                return assert(load(assert(file:read("*a")), filename))
+                end
+            end
+        end
+
+        return require(name)
+        
+        --return default_package_searchers2(name) -- tmp for now / it'll be deleted
+
+    else
+        print(name) -- else default return so it won't change code of other modules (f.e. log or ansicolors)
+        return default_package_searchers2(name)
+    end
+
+end
+--
 
 events["lighttouch_loaded"] = luvent.newEvent()
 events_actions["lighttouch_loaded"] = { }
