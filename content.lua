@@ -113,8 +113,10 @@ function content.documents (store_id)
 
     local docs_co = coroutine.create(function ()
       for store_id, dir in pairs(content.stores) do
-        for entry in fs.entries(dir) do
-          coroutine.yield(entry, store_id)
+        if fs.exists(dir) then
+          for entry in fs.entries(dir) do
+            coroutine.yield(entry, store_id)
+          end
         end
       end
     end)
