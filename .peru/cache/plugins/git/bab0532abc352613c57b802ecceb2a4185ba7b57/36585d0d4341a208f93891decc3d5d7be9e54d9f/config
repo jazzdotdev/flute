@@ -1,8 +1,0 @@
-[core]
-	repositoryformatversion = 0
-	filemode = true
-	bare = true
-[remote "origin"]
-	url = https://github.com/foundpatterns/lua-base64
-	fetch = +refs/*:refs/*
-	mirror = true
