@@ -43,72 +43,64 @@ package.searchers[2] = function(name)
     elseif string.match( name, "actions" ) then
         package.preload[name] = function(modulename)
             log.warn("custom require")
-            local created_file = assert(io.open("tmp-lua/module.lua", "w+"))
-            created_file:write("test")
+            local created_file = io.open("tmp-lua/module.lua", "w+")
             local modulepath = string.gsub(modulename, "%.", "/")
             --for path in string.gmatch(package.path, "([^;]+)") do
                 local path = "/"
                 local filename = string.gsub(path, "%?", modulepath)
-                created_file:write("test")
                 for line in io.lines(modulepath .. ".lua") do
                     log.debug(line)
                 end
-                created_file:write("test")
 
                 local file = io.open(filename, "rb")
-                created_file:write("test")
-
                 if file then
-                file:write("")
-                created_file:write("test")
 
-
-                local action_yaml = ""
-                local line_num = 0
-                for line in io.lines(modulepath .. ".lua") do
-                    line_num = line_num + 1        
-                    action_yaml = action_yaml .. line .. "\n" -- get only yaml lines
-                    if line_num == 3 then break end
-                end
-                created_file:write("Why can't i write in file goddamnit")
-                local action_yaml_table = yaml.to_table(action_yaml) -- decode yaml to lua table
-                created_file:write("Why can't i write in file goddamnit")
-                created_file:write("local event = { \"" .. action_yaml_table.event[1] .. "\"") -- put values from yaml in lua form
-
-                for _, yaml_event in ipairs(action_yaml_table.event) do
-                    if yaml_event ~= action_yaml_table.event[1] then 
-                        created_file:write(', "' .. yaml_event .. '"') -- put all events to 'local event = { }'
+                    local action_yaml = ""
+                    local line_num = 0
+                    for line in io.lines(modulepath .. ".lua") do
+                        line_num = line_num + 1        
+                        action_yaml = action_yaml .. line .. "\n" -- get only yaml lines
+                        if line_num == 3 then break end
                     end
-                end
-        
-                created_file:write(" }")
-                created_file:write("\nlocal priority = " .. action_yaml_table.priority .. " \n\n")
-                if action_yaml_table.input_parameters[1] then
-                    created_file:write("local input_parameters = { " .. "\"" .. action_yaml_table.input_parameters[1] .. "\"")
-                    for k, v in pairs(action_yaml_table.input_parameters) do
-                        if not table.contains(every_events_actions_parameters, v) then table.insert( every_events_actions_parameters, v ) end
-                        if k ~= 1 then
-                            created_file:write(", \"" .. v .. "\"")
+                    local action_yaml_table = yaml.to_table(action_yaml) -- decode yaml to lua table
+                    created_file:write("local event = { \"" .. action_yaml_table.event[1] .. "\"") -- put values from yaml in lua form
+
+                    for _, yaml_event in ipairs(action_yaml_table.event) do
+                        if yaml_event ~= action_yaml_table.event[1] then 
+                            created_file:write(', "' .. yaml_event .. '"') -- put all events to 'local event = { }'
                         end
                     end
-                    created_file:write("}\n") 
-                end
-                created_file:write("local function action(arguments)\n") -- function wrapper
-                
-                for k, v in pairs(action_yaml_table.input_parameters) do
-                    created_file:write("\n\tlocal " .. v .. " = " .. "arguments[\"" .. v .. "\"]")
-                end
-                line_num = 0
-
-                for line in io.lines(modulepath .. ".lua") do
-                    line_num = line_num + 1
-                    if line_num > 3 then
-                        created_file:write(line .. "\n\t")
+            
+                    created_file:write(" }")
+                    created_file:write("\nlocal priority = " .. action_yaml_table.priority .. " \n\n")
+                    if action_yaml_table.input_parameters[1] then
+                        created_file:write("local input_parameters = { " .. "\"" .. action_yaml_table.input_parameters[1] .. "\"")
+                        for k, v in pairs(action_yaml_table.input_parameters) do
+                            if not table.contains(every_events_actions_parameters, v) then table.insert( every_events_actions_parameters, v ) end
+                            if k ~= 1 then
+                                created_file:write(", \"" .. v .. "\"")
+                            end
+                        end
+                        created_file:write("}\n") 
                     end
-                end
-                created_file:write("\nend\n\nreturn{\n\tevent = event,\n\taction = action,\n\tpriority = priority,\n\tinput_parameters = input_parameters\n}") -- ending return
-                -- Compile and return the module
-                return assert(load(assert(created_file:read("*a")), modulepath .. ".lua"))
+                    created_file:write("local function action(arguments)\n") -- function wrapper
+                    
+                    for k, v in pairs(action_yaml_table.input_parameters) do
+                        created_file:write("\n\tlocal " .. v .. " = " .. "arguments[\"" .. v .. "\"]")
+                    end
+                    line_num = 0
+
+                    for line in io.lines(modulepath .. ".lua") do
+                        line_num = line_num + 1
+                        if line_num > 3 then
+                            created_file:write(line .. "\n\t")
+                        end
+                    end
+                    created_file:write("\nend\n\nreturn{\n\tevent = event,\n\taction = action,\n\tpriority = priority,\n\tinput_parameters = input_parameters\n}") -- ending return
+                    -- Compile and return the module
+                    created_file:close()
+                    local to_compile = io.open("tmp-lua/module.lua", "rb")
+                    return assert(load(assert(to_compile:read("*a")), modulepath))
                 end
             --end
         end
@@ -197,24 +189,6 @@ for k, package_name in pairs (fs.directory_list(packages_path)) do
     fs.create_dir("tmp-lua/" .. package_name .. "/actions/", true)
     for _, file_name in ipairs(action_files) do
         log.trace("[patching] action " .. ansicolors('%{underline}' .. file_name))
-        --local action_file = assert(io.open(packages_path .. "/" .. package_name .. "/actions/" .. file_name, "r")) -- open yaml / pseudo lua action ifle
-
-
-        --for line in io.lines(packages_path .. "/" .. package_name .. "/actions/" .. file_name) do
-
-        --end
-        
-        --local action_lua_file = assert(io.open("tmp-lua/" .. package_name .. "/actions/" .. file_name, "w+")) -- w+ to override old files
-
-
-        
-
-        --for line in io.lines(packages_path .. "/" .. package_name .. "/actions/" .. file_name) do
-
-        --end
-
-        --action_lua_file:write("\nend\n\nreturn{\n\tevent = event,\n\taction = action,\n\tpriority = priority,\n\tinput_parameters = input_parameters\n}") -- ending return
-        --action_lua_file:close()
 
         local action_require_name = "packages." .. package_name .. ".actions." .. string.sub( file_name, 0, string.len( file_name ) - 4 )
         local action_require = require(action_require_name)
@@ -225,7 +199,7 @@ for k, package_name in pairs (fs.directory_list(packages_path)) do
                 table.insert( events_actions[v], action_require )
                 local action = event:addAction(
                     function(action_arguments) -- ISSUE: we have to declare here as much arguments as the action needs(maybe do a table of arguments?)
-                        log.debug("[running] action " .. ansicolors('%{underline}' .. file_name) .. " with priority " .. action_yaml_table.priority )
+                        log.debug("[running] action " .. ansicolors('%{underline}' .. file_name) .. " with priority " .. action_require.priority )
                         -- TODO: figure out what to do if more than one responses are returned
                         possibleResponse = action_require.action(action_arguments)
                         if possibleResponse ~= nil then
