@@ -4,9 +4,6 @@
 -- foreach dir create specific path to events.txt, disabled_actions.txt, rules and actions
 -- 'trigger' the loaders
 
--- package.searchers test
--- package.searchers[2] - function for processing required module
-local log = require "third-party.log"
 local ansicolors = require 'third-party.ansicolors'
 local every_events_actions_parameters = { }
 local events_actions = { } -- events_actions["event_name"] = { event_action1_req, event_action2_req, ... etc. }
@@ -22,7 +19,6 @@ local packages_path_length = #packages_path_modules
 -- can be required using it's name as if it was a lua module, ej:
 -- require "lighttouch-libs.actions.create_key"
 package.path = package.path..";./packages/?.lua"
-
 
 local default_package_searchers2 = package.searchers[2]
 package.searchers[2] = function(name) 
@@ -188,6 +184,12 @@ events_actions["outgoing_response_about_to_be_sent"] = { }
 events["document_created"] = luvent.newEvent()
 events_actions["document_created"] = { }
 
+events["incoming_response_received"] = luvent.newEvent()
+events_actions["incoming_response_received"] = { }
+
+events["outgoing_request_about_to_be_sent"] = luvent.newEvent()
+events_actions["outgoing_request_about_to_be_sent"] = { }
+
 for k, package_name in pairs (fs.directory_list(packages_path)) do
     local package_path = packages_path .. "/" .. package_name .. "/"
 
@@ -245,7 +247,6 @@ for k, package_name in pairs (fs.directory_list(packages_path)) do
         action_files = fs.get_all_files_in(actions_path)
     end
 
-    fs.create_dir("tmp-lua/" .. package_name .. "/actions/", true)
     for _, file_name in ipairs(action_files) do
         log.trace("[patching] action " .. ansicolors('%{underline}' .. file_name))
 
@@ -257,8 +258,9 @@ for k, package_name in pairs (fs.directory_list(packages_path)) do
             if event then
                 table.insert( events_actions[v], action_require )
                 local action = event:addAction(
-                    function(action_arguments)
-                        log.debug("[running] action " .. ansicolors('%{underline}' .. file_name) .. " with priority " .. action_require.priority )
+                    function(action_arguments) -- ISSUE: we have to declare here as much arguments as the action needs(maybe do a table of arguments?)
+                        log.debug("[running] action " .. ansicolors('%{underline}' .. file_name) .. " with priority " .. action_yaml_table.priority )
+                        -- TODO: figure out what to do if more than one responses are returned
                         possibleResponse = action_require.action(action_arguments)
                         if possibleResponse ~= nil then
                             if possibleResponse.body ~= nil then
@@ -285,6 +287,7 @@ for k, package_name in pairs (fs.directory_list(packages_path)) do
 end
 -- 
 
+
 -- interpreted rules loading
 for k, package_name in pairs(fs.directory_list(packages_path)) do
 
@@ -303,15 +306,19 @@ for k, package_name in pairs(fs.directory_list(packages_path)) do
             rule_require.get_events_parameters(events_actions) -- let the rule know which parameters it needs to its events actions
             log.debug("[loading] rule " .. ansicolors('%{underline}' .. rule_require_name))
 
+            --table.insert(_G.rules, rule_require)
             _G.rules_priorities[rule_require_name] = rule_require.priority
         end
     end
 
 end
+
 -- everything is loaded now
-    os.remove("tmp-lua/module.lua")
+os.remove("tmp-lua/module.lua")
 --
+
 for k,v in sorted_pairs(_G.rules_priorities, function(t,a,b) return t[b] < t[a] end) do
     table.insert(_G.rules, require(k))
 end
 --
+
