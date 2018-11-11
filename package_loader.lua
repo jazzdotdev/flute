@@ -259,7 +259,7 @@ for k, package_name in pairs (fs.directory_list(packages_path)) do
                 table.insert( events_actions[v], action_require )
                 local action = event:addAction(
                     function(action_arguments) -- ISSUE: we have to declare here as much arguments as the action needs(maybe do a table of arguments?)
-                        log.debug("[running] action " .. ansicolors('%{underline}' .. file_name) .. " with priority " .. action_yaml_table.priority )
+                        log.debug("[running] action " .. ansicolors('%{underline}' .. file_name) .. " with priority " .. action_require.priority )
                         -- TODO: figure out what to do if more than one responses are returned
                         possibleResponse = action_require.action(action_arguments)
                         if possibleResponse ~= nil then
