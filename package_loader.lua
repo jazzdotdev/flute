@@ -302,13 +302,15 @@ for k, package_name in pairs(fs.directory_list(packages_path)) do
             local rule_require = require(rule_require_name)
             rule_require.get_events_parameters(events_actions) -- let the rule know which parameters it needs to its events actions
             log.debug("[loading] rule " .. ansicolors('%{underline}' .. rule_require_name))
-            
+
             _G.rules_priorities[rule_require_name] = rule_require.priority
         end
     end
 
 end
-
+-- everything is loaded now
+    os.remove("tmp-lua/module.lua")
+--
 for k,v in sorted_pairs(_G.rules_priorities, function(t,a,b) return t[b] < t[a] end) do
     table.insert(_G.rules, require(k))
 end
