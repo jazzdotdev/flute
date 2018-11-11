@@ -59,3 +59,11 @@ function table.contains(tab, val)
   end
   return false
 end
+
+function table:copy ()
+  local t = {}
+  for k, v in pairs(self) do
+    t[k] = v
+  end
+  return t
+end

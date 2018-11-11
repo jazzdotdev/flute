@@ -40,6 +40,15 @@ end
 incoming_request_event:addAction(request_process_action)
 incoming_request_event:setActionPriority(request_process_action, 100)
 
+local outgoing_response_event = events["outgoing_response_about_to_be_sent"]
+local function response_process_action ()
+    local response_uuid = uuid.v4()
+    response.uuid = response_uuid
+    log.info("\tSending response: " .. response_uuid)
+end
+outgoing_response_event:addAction(response_process_action)
+outgoing_response_event:setActionPriority(response_process_action, 100)
+
 function _G.send_request (request)
 
   if type(request) == "string" then
