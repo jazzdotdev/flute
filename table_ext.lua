@@ -30,7 +30,7 @@ _G.count_pairs = function (iter)
   return n
 end
 
-function _G.sorted_pairs(t, order)
+function table.sorted_pairs(t, order)
    -- collect the keys 
   local keys = {} 
   for k in pairs(t) do keys[#keys+1] = k end 

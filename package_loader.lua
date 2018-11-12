@@ -317,7 +317,7 @@ end
 os.remove("tmp-lua/module.lua")
 --
 
-for k,v in sorted_pairs(_G.rules_priorities, function(t,a,b) return t[b] < t[a] end) do
+for k,v in table.sorted_pairs(_G.rules_priorities, function(t,a,b) return t[b] < t[a] end) do
     table.insert(_G.rules, require(k))
 end
 --
