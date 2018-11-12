@@ -3,6 +3,32 @@
 
 local keys = {}
 
+function get_profile ()
+  return content.walk_documents("home",
+    function (file_uuid, header, body)
+      if header.model == "profile" then
+        return file_uuid, header.name
+      end
+    end
+  )
+end
+
+function keys.get_private_key ()
+  local priv_key = content.walk_documents("home",
+    function (file_uuid, header, body)
+      if header.model == "key"
+      and header.kind == "sign_private"
+      then
+        return body
+      end
+    end
+  )
+
+  if priv_key then
+    return crypto.sign.load_secret(priv_key)
+  end
+end
+
 function keys.verify_http_signature (message)
 
   -- TODO: The headers part of the signature header is being ignored.
@@ -22,7 +48,7 @@ function keys.verify_http_signature (message)
 
   local pub_key = content.walk_documents(keyId,
     function (file_uuid, header, body)
-      if header.type == "key" and header.kind == "sign_public" then
+      if header.model == "key" and header.kind == "sign_public" then
         return body
       end
     end
@@ -50,35 +76,19 @@ function keys.verify_http_signature (message)
 end
 
 function keys.sign_http_message (message)
-  local profile_uuid = content.walk_documents("home",
-    function (file_uuid, header, body)
-      if header.type == "profile" then
-        return file_uuid
-      end
-    end
-  )
+  local profile_uuid = get_profile()
 
   if not profile_uuid then
     log.error("Could not sign: No home profile found")
     return false
   end
 
-  local priv_key = content.walk_documents("home",
-    function (file_uuid, header, body)
-      if header.type == "key"
-      and header.kind == "sign_private"
-      then
-        return body
-      end
-    end
-  )
+  local priv_key = keys.get_private_key()
 
   if not priv_key then
     log.error("Could not sign: No private key for home profile")
     return false
   end
-
-  priv_key = crypto.sign.load_secret(priv_key)
 
   if not message.headers.date then
     message.headers.date = tostring(time.now())
@@ -92,6 +102,45 @@ function keys.sign_http_message (message)
   message.headers.signature = 'keyId="' .. profile_uuid .. '",algorithm="ed25519",signature="' .. signature .. '"'
 
   return message
+end
+
+function keys.witness_document (document_id)
+  local date = tostring(time.now())
+
+  local profile_uuid = get_profile()
+  if not profile_uuid then return nil, "Profile not found" end
+
+  local fields, body, store = content.read_document(document_id)
+  if not fields then return nil, "Document not found" end
+
+  local priv_key = keys.get_private_key()
+  if not priv_key then return nil, "Private key not found" end
+
+  local field_str = ""
+  for k, v in table.sorted_pairs(fields) do
+    field_str = field_str .. tostring(k) .. "=" .. tostring(v) .. ";"
+  end
+
+  local sign_str = date .. ";" .. field_str .. body
+
+  local signature = priv_key:sign_detached(sign_str)
+
+  local witness_id = uuid.v4()
+
+  local witness_fields = {
+    model = "witness",
+    profile = profile_uuid,
+    document = document_id,
+    document_model = fields.model,
+    [fields.model] = document_id,
+    date = date,
+    signed_string = sign_str,
+    signature = signature
+  }
+
+  content.write_file("home", witness_id, witness_fields, "")
+
+  return witness_id
 end
 
 return keys

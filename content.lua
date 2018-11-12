@@ -1,7 +1,11 @@
 
 local content = {
-  stores = {}
+  stores = {
+    home = "content/home/"
+  }
 }
+
+fs.create_dir("content/home", true)
 
 function content.split_header (document_text)
     local yaml_text, body = document_text:match("(.-)\n%.%.%.*\n?(.*)")
@@ -151,7 +155,7 @@ function content.walk_documents (_store_id, fn)
   end
 end
 
-function content.write_file (store_id, file_uuid, header, body)
+function content.write_file (store_id, file_uuid, header, _body)
   local dir = content.stores[store_id]
   if not dir then
     dir = "content/" .. store_id .. "/"
@@ -159,7 +163,7 @@ function content.write_file (store_id, file_uuid, header, body)
     content.stores[store_id] = dir
   end
   local path = dir .. file_uuid
-  local body = yaml.from_table(header) .. "\n...\n" .. (body or "")
+  local body = yaml.from_table(header) .. "\n...\n" .. (_body or "")
   local file = io.open(path, "w")
   if not file then
     log.error("Could not open file", path)

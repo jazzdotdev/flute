@@ -315,7 +315,7 @@ for k, package_name in pairs(fs.directory_list(packages_path)) do
 
 end
 
-for k,v in sorted_pairs(_G.rules_priorities, function(t,a,b) return t[b] < t[a] end) do
+for k,v in table.sorted_pairs(_G.rules_priorities, function(t,a,b) return t[b] < t[a] end) do
     table.insert(_G.rules, require(k))
 end
 --
