@@ -20,7 +20,23 @@ local packages_path_length = #packages_path_modules
 -- require "lighttouch-libs.actions.create_key"
 package.path = package.path..";./packages/?.lua"
 
-require "custom_loaders"
+local actions_loader = require "actions_loader"
+local rules_loader = require "rules_loader"
+
+local default_package_searchers2 = package.searchers[2]
+package.searchers[2] = function(name) 
+    if string.match( name, "actions") then
+        package.preload[name] = actions_loader.loader
+        return require(name)
+    elseif string.match( name, "rules") then
+        package.preload[name] = rules_loader.loader
+        return require(name)
+    else
+        print(name) -- else default return so it won't change code of other modules (f.e. log or ansicolors)
+        return default_package_searchers2(name)
+    end
+end
+--
 
 events["lighttouch_loaded"] = luvent.newEvent()
 events_actions["lighttouch_loaded"] = { }
@@ -89,8 +105,8 @@ for k, package_name in pairs (fs.directory_list(packages_path)) do
     
         return false
     end
-    -- actions loader
-    
+
+-- actions loading
     local actions_path = package_path .. "actions/"
     local action_files = {} -- actions path is optional
     if fs.exists(actions_path) then
@@ -164,7 +180,7 @@ for k, package_name in pairs(fs.directory_list(packages_path)) do
 end
 
 -- everything is loaded now
-os.remove("tmp-lua/module.lua")
+os.remove("module.lua")
 --
 
 for k,v in table.sorted_pairs(_G.rules_priorities, function(t,a,b) return t[b] < t[a] end) do
