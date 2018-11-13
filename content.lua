@@ -155,7 +155,7 @@ function content.walk_documents (_store_id, fn)
   end
 end
 
-function content.write_file (store_id, file_uuid, header, _body)
+function content.write_file (store_id, file_uuid, fields, body_param)
   local dir = content.stores[store_id]
   if not dir then
     dir = "content/" .. store_id .. "/"
@@ -163,7 +163,12 @@ function content.write_file (store_id, file_uuid, header, _body)
     content.stores[store_id] = dir
   end
   local path = dir .. file_uuid
-  local body = yaml.from_table(header) .. "\n...\n" .. (_body or "")
+
+  if not fields.creation_time then
+    fields.creation_time = tostring(time.now())
+  end
+  
+  local body = yaml.from_table(fields) .. "\n...\n" .. (body_param or "")
   local file = io.open(path, "w")
   if not file then
     log.error("Could not open file", path)
