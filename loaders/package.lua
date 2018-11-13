@@ -21,9 +21,9 @@ local packages_path_length = #packages_path_modules
 package.path = package.path..";./packages/?.lua"
 
 
-require "events_loader"
-require "actions_loader"
-require "rules_loader"
+require "loaders.events"
+require "loaders.actions"
+require "loaders.rules"
 
 -- everything is loaded now
 os.remove("module.lua")
