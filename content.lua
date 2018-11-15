@@ -4,17 +4,19 @@ local content = {
     home = "content/home/"
   }
 }
+local valua = require "third-party.valua"
 
 fs.create_dir("content/home", true)
 
-function content.split_header (document_text)
-    local yaml_text, body = document_text:match("(.-)\n%.%.%.*\n?(.*)")
-    local header = yaml.to_table(yaml_text)
-    return header, body
-end
 
-local valua = require "third-party.valua"
-
+require "content_functions.split_header"
+-- require "content_functions.get_model_definition"
+-- require "content_functions.get_validatior"
+-- require "content_functions.validate_document"
+-- require "content_functions.read_document"
+-- require "content_functions.documents"
+-- require "content_functions.walk_documents"
+-- request "content_functions.write_file"
 
 -- Methods for the model class
 local model_metatable = {}
@@ -28,6 +30,15 @@ function model_metatable:validate (object)
   end
   return true
 end
+
+
+-- function content.split_header (document_text)
+--     local yaml_text, body = document_text:match("(.-)\n%.%.%.*\n?(.*)")
+--     local header = yaml.to_table(yaml_text)
+--     return header, body
+-- end
+
+
 
 function content.get_model_definition (name)
   local content = fs.read_file("models/" .. name .. ".yaml")
