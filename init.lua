@@ -26,7 +26,7 @@ require "underscore_alias"
 _G.content = require "content"
 _G.keys = require "keys"
 
-require "package_loader"
+require "loaders.package"
 
 local incoming_request_event = events["incoming_request_received"]
 local function request_process_action ()
