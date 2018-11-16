@@ -207,4 +207,52 @@ for entry in fs.entries("content/") do
   end
 end
 
+
+-----------------------------------
+--------      Tantivy      --------
+-----------------------------------
+
+function content.setup_schema ()
+  local builder = tan.new_schema_builder()
+  builder:add_text_field("uuid", {tan.STRING, tan.STORED})
+  builder:add_text_field("model", {tan.TEXT, tan.STORED})
+  builder:add_text_field("content", {tan.TEXT})
+  content.schema = builder:build()
+end
+
+function content.setup_index (path)
+  path = path or "./tantivity-index"
+
+  --fs.remove_dir(path, true) This function isn't implemented yet
+  fs.create_dir(path, true)
+
+  content.index = tan.index_in_dir(path, content.schema)
+
+  local index_writer = content.index:writer(50000000)
+  local uuid_field = content.schema:get_field("uuid")
+  local model_field = content.schema:get_field("model")
+  local content_field = content.schema:get_field("content")
+
+  for doc_id, store_id in content.documents() do
+    local path = content.stores[store_id] .. doc_id
+
+    local file_content = fs.read_file(path)
+    if not file_content then
+      log.error("could not open " .. path)
+    end
+
+    local doc_fields = content.split_header(file_content)
+
+    local doc = tan.new_document()
+    doc:add_text(uuid_field, doc_id)
+    doc:add_text(model_field, doc_fields.model)
+    doc:add_text(content_field, file_content)
+    index_writer:add_document(doc)
+  end
+
+  index_writer:commit()
+  content.index:load_searchers()
+end
+
+
 return content
