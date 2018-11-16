@@ -1,4 +1,4 @@
-require "content_base"
+require "content_functions.content_base"
 
 function content.get_validator (name)
     local model_def, err = content.get_model_definition(name)

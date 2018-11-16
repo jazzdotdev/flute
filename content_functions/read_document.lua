@@ -1,4 +1,4 @@
-require "content_base"
+require "content_functions.content_base"
 
 function content.read_document (in_uuid)
     return content.walk_documents(nil, function (file_uuid, header, body, profile)

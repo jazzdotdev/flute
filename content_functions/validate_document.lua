@@ -1,4 +1,4 @@
-require "content_base"
+require "content_functions.content_base"
 
 function content.validate_document (header)
     if not header.model then

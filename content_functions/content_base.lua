@@ -1,4 +1,4 @@
-local content = {
+content = {
     stores = {
       home = "content/home/"
     }
