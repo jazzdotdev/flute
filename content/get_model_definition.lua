@@ -1,4 +1,4 @@
-require "content_functions.content_base"
+require "content.content_base"
 
 function content.get_model_definition (name)
   local content = fs.read_file("models/" .. name .. ".yaml")

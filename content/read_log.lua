@@ -1,4 +1,4 @@
-require "content_functions.content_base"
+require "content.content_base"
 
 function content.read_log (log_uuid)
     -- It's getting just the request logs, it should read all logs but this
