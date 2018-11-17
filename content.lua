@@ -223,7 +223,8 @@ end
 function content.setup_index (path)
   path = path or "./tantivity-index"
 
-  --fs.remove_dir(path, true) This function isn't implemented yet
+  --TODO: implement fs.remove_dir(path, true)
+  os.execute("rm -r " .. path)
   fs.create_dir(path, true)
 
   content.index = tan.index_in_dir(path, content.schema)
@@ -243,11 +244,16 @@ function content.setup_index (path)
 
     local doc_fields = content.split_header(file_content)
 
-    local doc = tan.new_document()
-    doc:add_text(uuid_field, doc_id)
-    doc:add_text(model_field, doc_fields.model)
-    doc:add_text(content_field, file_content)
-    index_writer:add_document(doc)
+    if doc_fields.model then
+      local doc = tan.new_document()
+      doc:add_text(uuid_field, doc_id)
+      doc:add_text(model_field, doc_fields.model)
+      doc:add_text(content_field, file_content)
+      index_writer:add_document(doc)
+    else
+      log.warn("Document " .. doc_id .. " in " .. store_id .. " does not have a model")
+    end
+
   end
 
   index_writer:commit()
