@@ -19,7 +19,9 @@ local fs_lua = require("fs")
 
 local function load_themes(themes_dir, initial_name)
 
-    os.execute("mkdir -p temp-theme") -- autocreate tmp-thme for now
+    os.execute("rm -r temp-theme") -- autocreate tmp-thme for now
+    --os.execute("mkdir -p temp-theme") -- autocreate tmp-thme for now
+    fs.create_dir("temp-theme")
 
     local themes_dir_path = themes_dir -- for now put it manually here
     local initial_theme_name = initial_name -- put the initial name here
@@ -35,16 +37,15 @@ local function load_themes(themes_dir, initial_name)
 
     for line in io.lines(initial_config_path) do -- get the parent themes info from config.yaml
         line_num = line_num + 1
-        initial_yaml = initial_yaml .. line
+        initial_yaml = initial_yaml .. '\n' .. line
     end
 
     local initial_yaml_table = yaml.to_table(initial_yaml) -- translate yaml to lua table
-
     
-    -- for k, v in ipairs(initial_yaml_table.parents) do
-    --     print("[DEBUG] Found theme " .. v)
-    --     table.insert( themes, v ) -- put the themes names into table
-    -- end
+    for k, v in ipairs(initial_yaml_table.parent) do
+        log.debug("Found theme " .. v)
+        table.insert( themes, v ) -- put the themes names into table
+    end
 
     for k, v in ipairs(themes) do -- copy files to tmp-theme from each theme from intital-theme/config.yaml
 

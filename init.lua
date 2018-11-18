@@ -30,7 +30,7 @@ require "loaders.package"
 
 local theme_loader = require "loaders.themes"
 
-theme_loader.load_themes("themes", "theme1")
+theme_loader.load_themes("themes", "theme2")
 
 local incoming_request_event = events["incoming_request_received"]
 local function request_process_action ()
