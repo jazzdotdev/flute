@@ -215,13 +215,13 @@ end
 function content.setup_schema ()
   local builder = tan.new_schema_builder()
   builder:add_text_field("uuid", {tan.STRING, tan.STORED})
-  builder:add_text_field("model", {tan.TEXT, tan.STORED})
+  builder:add_text_field("model", {tan.STRING, tan.STORED})
   builder:add_text_field("content", {tan.TEXT})
   content.schema = builder:build()
 end
 
 function content.setup_index (path)
-  path = path or "./tantivity-index"
+  path = path or "./tantivy-index"
 
   --TODO: implement fs.remove_dir(path, true)
   os.execute("rm -r " .. path)
