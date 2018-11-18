@@ -1,21 +1,21 @@
-local fs = require("fs")
+local fs_lua = require("fs")
 
-function string:split(sep) -- string split function to extracting package name
-    local sep, fields = sep or ":", {}
-    local pattern = string.format("([^%s]+)", sep)
-    self:gsub(pattern, function(c) fields[#fields+1] = c end)
-    return fields
-end
+-- function string:split(sep) -- string split function to extracting package name
+--     local sep, fields = sep or ":", {}
+--     local pattern = string.format("([^%s]+)", sep)
+--     self:gsub(pattern, function(c) fields[#fields+1] = c end)
+--     return fields
+-- end
 
-local function file_exist(path)
-    local f = io.open(path, "r")
-    if f ~= nil then
-        io.close(f)
-        return true
-    else
-        return false
-    end
-end
+-- local function file_exist(path)
+--     local f = io.open(path, "r")
+--     if f ~= nil then
+--         io.close(f)
+--         return true
+--     else
+--         return false
+--     end
+-- end
 
 local function load_themes(themes_dir, initial_name)
 
@@ -27,7 +27,7 @@ local function load_themes(themes_dir, initial_name)
     local themes = {}
 
     local initial_theme_path = themes_dir_path .. "/" .. initial_theme_name
-    local initial_config_path = initial_theme_path .. "/" .. "config.yaml" -- open config.yaml from initial
+    local initial_config_path = initial_theme_path .. "/" .. "info.yaml" -- open info.yaml from initial
     table.insert( themes, initial_theme_name )
     
     local initial_yaml = ""
@@ -35,20 +35,16 @@ local function load_themes(themes_dir, initial_name)
 
     for line in io.lines(initial_config_path) do -- get the parent themes info from config.yaml
         line_num = line_num + 1
-        if line_num == 1 then
-            initial_yaml = initial_yaml .. line
-        else
-            break
-        end
+        initial_yaml = initial_yaml .. line
     end
 
-    local initial_yaml_table = yaml.load(initial_yaml) -- translate yaml to lua table
+    local initial_yaml_table = yaml.to_table(initial_yaml) -- translate yaml to lua table
 
     
-    for k, v in ipairs(initial_yaml_table.parents) do
-        print("[DEBUG] Found theme " .. v)
-        table.insert( themes, v ) -- put the themes names into table
-    end
+    -- for k, v in ipairs(initial_yaml_table.parents) do
+    --     print("[DEBUG] Found theme " .. v)
+    --     table.insert( themes, v ) -- put the themes names into table
+    -- end
 
     for k, v in ipairs(themes) do -- copy files to tmp-theme from each theme from intital-theme/config.yaml
 
@@ -59,15 +55,15 @@ local function load_themes(themes_dir, initial_name)
 
         repeat
 
-            local files_in_dir = fs.get_all_files_in(path_to_copy) -- get files from theme main or theme subdirectory
+            local files_in_dir = fs.read_dir(path_to_copy) -- get files from theme main or theme subdirectory
             for _, file_name in ipairs(files_in_dir) do
                 local file_path = path_to_copy .. file_name
                 local dest_of_file = dest_path .. file_name
-                if not file_exist(dest_of_file) and string.sub( file_name, -1 ) ~= '/' then -- if file not exist and file is not directory
-                    fs.copy(file_path, dest_of_file)
+                if not fs.exists(dest_of_file) and string.sub( file_name, -1 ) ~= '/' then -- if file not exist and file is not directory
+                    fs_lua.copy(file_path, dest_of_file)
                 end
             end
-                dirs = fs.directory_list2(path_to_copy) -- get list of directories in current location
+                dirs = fs_lua.directory_list(path_to_copy) -- get list of directories in current location
 
                 for k, v in pairs(dirs) do
 
@@ -95,8 +91,7 @@ local function load_themes(themes_dir, initial_name)
 
         until(#paths == 0) -- repeat until there were no more subdirectiories
 
-        print("[DEBUG] Loop ended")
-
+        log.debug("Themes loop ended")
     end
     
 end    

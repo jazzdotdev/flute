@@ -28,6 +28,10 @@ _G.keys = require "keys"
 
 require "loaders.package"
 
+local theme_loader = require "loaders.themes"
+
+theme_loader.load_themes("themes", "theme1")
+
 local incoming_request_event = events["incoming_request_received"]
 local function request_process_action ()
     local request_uuid = uuid.v4()
