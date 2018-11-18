@@ -120,36 +120,39 @@ function content.read_document (doc_id, store_id)
 end
 
 function content.documents (store_id)
+  -- TODO: properly test this function
+
+  local query = "*"
   if store_id then
-    local dir = content.stores[store_id]
+    -- "store:" says to look directly in the store field
+    -- + means it's required
+    -- store_id can have dashes, so it needs to be quoted
+    query = '+store:"' .. store_id .. '"'
+  end
 
-    local f = fs.entries(dir)
+  -- Coroutines are like "threads"
+  local docs_co = coroutine.create(function ()
+    local result = content.query(query)
 
-    return function ()
-      local entry = f()
-      if entry then
-        return entry, store_id
-      end
+    for i = 1, #result do
+      local doc = result[i]
+
+      -- each time it reaches this, the coroutine is paused until
+      -- called again and returns the values given to yield
+      coroutine.yield(
+        doc:get_first(content.fields.uuid),
+        doc:get_first(content.fields.store)
+      )
     end
-  else
+  end)
 
-    local docs_co = coroutine.create(function ()
-      for store_id, dir in pairs(content.stores) do
-        if fs.exists(dir) then
-          for entry in fs.entries(dir) do
-            coroutine.yield(entry, store_id)
-          end
-        end
-      end
-    end)
-
-    return function ()
-      local cont, uuid, store_id = coroutine.resume(docs_co)
-      if cont then
-        return uuid, store_id
-      end
+  -- This is an iterator, so it returns an iterator function
+  -- (each time it's called, returns the next item)
+  return function ()
+    local cont, uuid, store_id = coroutine.resume(docs_co)
+    if cont then
+      return uuid, store_id
     end
-
   end
 end
 
