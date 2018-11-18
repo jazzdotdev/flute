@@ -1,4 +1,4 @@
-require "content.content_base"
+
 
 function content.documents (store_id)
     if store_id then

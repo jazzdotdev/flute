@@ -1,4 +1,4 @@
-require "content.content_base"
+
 
 function content.get_document_path (doc_uuid, store_id)
     if store_id then

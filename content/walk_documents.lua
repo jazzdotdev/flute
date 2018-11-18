@@ -1,4 +1,3 @@
-require "content.content_base"
 
 function content.walk_documents (_store_id, fn)
     for doc_id, store_id in content.documents(_store_id) do

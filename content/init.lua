@@ -1,3 +1,4 @@
+require "content.content_base"
 require "content.split_header"
 require "content.get_model_definition"
 require "content.get_validator"

@@ -1,4 +1,3 @@
-require "content.content_base"
 
 function content.write_file (store_id, file_uuid, fields, body_param)
     local dir = content.stores[store_id]

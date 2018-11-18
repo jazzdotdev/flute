@@ -1,4 +1,3 @@
-require "content.content_base"
 
 function content.split_header (document_text)
     local yaml_text, body = document_text:match("(.-)\n%.%.%.*\n?(.*)")
