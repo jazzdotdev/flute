@@ -184,22 +184,6 @@ function content.write_file (store_id, file_uuid, fields, body_param)
   })
 end
 
-function content.read_log (log_uuid)
-  -- It's getting just the request logs, it should read all logs but this
-  -- function is not completely thought trough yet
-  local dir = "log/incoming-request/"
-
-  for _, file_uuid in ipairs(fs.get_all_files_in(dir)) do
-    local path = dir .. file_uuid
-    local file_content = fs.read_file(path)
-    if not file_content then
-      error("could not open " .. path)
-    end
-
-    return yaml.to_table(file_content)
-  end
-end
-
 -- Add all directories in content to the stores table
 for entry in fs.entries("content/") do
   if fs.metadata("content/" .. entry).type == "directory" then
@@ -214,10 +198,20 @@ end
 
 function content.setup_schema ()
   local builder = tan.new_schema_builder()
+
   builder:add_text_field("uuid", {tan.STRING, tan.STORED})
+  builder:add_text_field("store", {tan.STRING, tan.STORED})
   builder:add_text_field("model", {tan.STRING, tan.STORED})
   builder:add_text_field("content", {tan.TEXT})
+
   content.schema = builder:build()
+
+  content.fields = {}
+
+  content.fields.uuid = content.schema:get_field("uuid")
+  content.fields.store = content.schema:get_field("store")
+  content.fields.model = content.schema:get_field("model")
+  content.fields.content = content.schema:get_field("content")
 end
 
 function content.setup_index (path)
@@ -230,11 +224,8 @@ function content.setup_index (path)
   content.index = tan.index_in_dir(path, content.schema)
 
   local index_writer = content.index:writer(50000000)
-  local uuid_field = content.schema:get_field("uuid")
-  local model_field = content.schema:get_field("model")
-  local content_field = content.schema:get_field("content")
 
-  for doc_id, store_id in content.documents() do
+  function add_document (doc_id, store_id)
     local path = content.stores[store_id] .. doc_id
 
     local file_content = fs.read_file(path)
@@ -246,18 +237,53 @@ function content.setup_index (path)
 
     if doc_fields.model then
       local doc = tan.new_document()
-      doc:add_text(uuid_field, doc_id)
-      doc:add_text(model_field, doc_fields.model)
-      doc:add_text(content_field, file_content)
+      doc:add_text(content.fields.uuid, doc_id)
+      doc:add_text(content.fields.store, store_id)
+      doc:add_text(content.fields.model, doc_fields.model)
+      doc:add_text(content.fields.content, file_content)
       index_writer:add_document(doc)
     else
       log.warn("Document " .. doc_id .. " in " .. store_id .. " does not have a model")
     end
+  end
 
+
+  -- Walk through all documents and add them to the index
+  for store_id, dir in pairs(content.stores) do
+    if fs.exists(dir) then
+      for doc_id in fs.entries(dir) do
+        add_document(doc_id, store_id)
+      end
+    end
   end
 
   index_writer:commit()
   content.index:load_searchers()
+end
+
+function content.query (query_str)
+  log.trace("Start tantivy search")
+
+  local fields = {}
+  for _, v in pairs(content.fields) do
+    table.insert(fields, v)
+  end
+
+  local parser = tan.query_parser_for_index(content.index, fields)
+  local coll = tan.top_collector_with_limit(10)
+  local result = content.index:search(parser, query_str, coll)
+
+  return result
+  --[[
+    for i = 1, #result do
+      local doc = result[i]
+      table.insert(uuids, {
+        file = doc:get_first(uuid_field),
+        profile = "unknown_profile"
+      })
+    end
+    log.trace("End tantivy search")
+  --]]
 end
 
 
