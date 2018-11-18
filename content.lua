@@ -93,12 +93,30 @@ function content.get_document_path (doc_uuid, store_id)
   end
 end
 
-function content.read_document (in_uuid)
-  return content.walk_documents(nil, function (file_uuid, header, body, profile)
-    if file_uuid == in_uuid then
-      return header, body, profile
+function content.read_document (doc_id, store_id)
+
+  -- If not given, find the store of the document using tantivy
+  if not store_id then
+    -- + means required
+    -- uuids have dashes, which are special characters so they have to be quoted
+    local result = content.query('+uuid:"' .. doc_id .. '"')
+    if #result == 0 then
+      error("Document " .. doc_id .. " not found in index")
     end
-  end)
+
+    store_id = result[1]:get_first(content.fields.store)
+  end
+
+  local path = content.stores[store_id] .. doc_id
+
+  local file_content = fs.read_file(path)
+  if not file_content then
+    error("could not open " .. path)
+  end
+
+  local fields, body = content.split_header(file_content)
+
+  return fields, body, store_id
 end
 
 function content.documents (store_id)
@@ -206,12 +224,12 @@ function content.setup_schema ()
 
   content.schema = builder:build()
 
-  content.fields = {}
-
-  content.fields.uuid = content.schema:get_field("uuid")
-  content.fields.store = content.schema:get_field("store")
-  content.fields.model = content.schema:get_field("model")
-  content.fields.content = content.schema:get_field("content")
+  content.fields = {
+    uuid = content.schema:get_field("uuid"),
+    store = content.schema:get_field("store"),
+    model = content.schema:get_field("model"),
+    content = content.schema:get_field("content"),
+  }
 end
 
 function content.setup_index (path)
@@ -226,11 +244,13 @@ function content.setup_index (path)
   local index_writer = content.index:writer(50000000)
 
   function add_document (doc_id, store_id)
+
+    -- Would use content.read_document but it doesn't return the file contents
     local path = content.stores[store_id] .. doc_id
 
     local file_content = fs.read_file(path)
     if not file_content then
-      log.error("could not open " .. path)
+      error("could not open " .. path)
     end
 
     local doc_fields = content.split_header(file_content)
