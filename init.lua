@@ -16,6 +16,8 @@ _G.luvent = require "third-party.Luvent"
 require "third-party.base64"
 _G.fs = require "fs"
 
+log.level = torchbear.settings.log_level or "info"
+
 fs.create_dir("log")
 log.outfile = "log/lighttouch"
 
@@ -23,7 +25,7 @@ require "table_ext"
 require "string_ext"
 require "underscore_alias"
 
-_G.content = require "content"
+_G.content = require "content.init"
 _G.keys = require "keys"
 
 require "loaders.package"
@@ -70,6 +72,11 @@ function _G.send_request (request)
 end
 
 log.info("[loaded] LightTouch")
+
+content.setup_schema()
+content.setup_index()
+
+log.info("[loaded] Tantivy index")
 
 events["lighttouch_loaded"]:trigger()
 
