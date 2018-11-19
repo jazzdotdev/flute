@@ -1,31 +1,13 @@
 local fs_lua = require("fs")
 
--- function string:split(sep) -- string split function to extracting package name
---     local sep, fields = sep or ":", {}
---     local pattern = string.format("([^%s]+)", sep)
---     self:gsub(pattern, function(c) fields[#fields+1] = c end)
---     return fields
--- end
-
--- local function file_exist(path)
---     local f = io.open(path, "r")
---     if f ~= nil then
---         io.close(f)
---         return true
---     else
---         return false
---     end
--- end
-
 local function load_themes(themes_dir, initial_name)
 
-    os.execute("rm -r temp-theme") -- autocreate tmp-thme for now
-    --os.execute("mkdir -p temp-theme") -- autocreate tmp-thme for now
-    fs.create_dir("temp-theme")
+    os.execute("rm -r temp-theme") -- remove old temp-theme
+    fs.create_dir("temp-theme") -- create tmp-thme dir
 
-    local themes_dir_path = themes_dir -- for now put it manually here
-    local initial_theme_name = initial_name -- put the initial name here
-    local temp_theme_path = "temp-theme" -- put the path for temp theme dir here
+    local themes_dir_path = themes_dir -- take themes dir from function arguments
+    local initial_theme_name = initial_name -- take initial theme name from function arguments
+    local temp_theme_path = "temp-theme" -- path for temp-theme
     local themes = {}
 
     local initial_theme_path = themes_dir_path .. "/" .. initial_theme_name
@@ -35,7 +17,7 @@ local function load_themes(themes_dir, initial_name)
     local initial_yaml = ""
     local line_num = 0
 
-    for line in io.lines(initial_config_path) do -- get the parent themes info from config.yaml
+    for line in io.lines(initial_config_path) do -- get the parent themes info from info.yaml
         line_num = line_num + 1
         initial_yaml = initial_yaml .. '\n' .. line
     end
@@ -49,7 +31,7 @@ local function load_themes(themes_dir, initial_name)
         end
     end
 
-    for k, v in ipairs(themes) do -- copy files to tmp-theme from each theme from intital-theme/config.yaml 
+    for k, v in ipairs(themes) do -- copy files to tmp-theme from each parent of each theme 
         local theme_yaml = ""
         local theme_name = v
         local path_to_copy = themes_dir_path .. "/" .. theme_name .. "/"
@@ -57,12 +39,12 @@ local function load_themes(themes_dir, initial_name)
         local paths = {}
 
         for line in io.lines(path_to_copy .. "info.yaml") do
-            theme_yaml = theme_yaml .. "\n" .. line
+            theme_yaml = theme_yaml .. "\n" .. line -- get yaml from one of parent themes
         end
 
         local theme_yaml_table = yaml.to_table(theme_yaml)
         if theme_yaml_table.parent ~= nil then
-            for k1, v1 in ipairs(theme_yaml_table.parent) do
+            for k1, v1 in ipairs(theme_yaml_table.parent) do -- adding parents of each theme to themes to load
                 log.debug("Found theme " .. v1 .. " as parent for " .. v)
                 table.insert(themes, v1)
             end
