@@ -119,16 +119,8 @@ function content.read_document (doc_id, store_id)
   return fields, body, store_id
 end
 
-function content.documents (store_id)
-  -- TODO: properly test this function
-
-  local query = "*"
-  if store_id then
-    -- "store:" says to look directly in the store field
-    -- + means it's required
-    -- store_id can have dashes, so it needs to be quoted
-    query = '+store:"' .. store_id .. '"'
-  end
+function content.documents (query)
+  local query = query or "*"
 
   -- Coroutines are like "threads"
   local docs_co = coroutine.create(function ()
@@ -156,14 +148,13 @@ function content.documents (store_id)
   end
 end
 
--- DEPRECATED
-function content.walk_documents (_store_id, fn)
-  for doc_id, store_id in content.documents(_store_id) do
+function content.walk_documents (query, fn)
+  for doc_id, store_id in content.documents(query) do
 
     local path = content.stores[store_id] .. doc_id
     local file_content = fs.read_file(path)
     if not file_content then
-      log.error("could not open " .. path)
+      error("could not open " .. path)
     end
 
     local header, body = content.split_header(file_content)
@@ -293,7 +284,7 @@ function content.query (query_str)
   end
 
   local parser = tan.query_parser_for_index(content.index, fields)
-  local coll = tan.top_collector_with_limit(10)
+  local coll = tan.top_collector_with_limit(500)
   local result = content.index:search(parser, query_str, coll)
 
   return result
