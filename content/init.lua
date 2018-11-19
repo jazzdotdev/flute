@@ -1,20 +1,11 @@
-require "content.content_base"
 
-require "content.add_document_to_index"
-require "content.setup_schema"
-require "content.setup_index"
-require "content.query"
+content = {
+  stores = {
+    home = "content/home/"
+  }
+}
 
-require "content.split_header"
-require "content.get_model_definition"
-require "content.get_validator"
-require "content.validate_document"
-
-require "content.read_document"
-require "content.documents"
-require "content.walk_documents"
-require "content.write_file"
-
+fs.create_dir("content/home", true)
 
 -- Methods for the model class
 local model_metatable = {}
@@ -35,5 +26,25 @@ for entry in fs.entries("content/") do
     content.stores[entry] = "content/" .. entry .. "/"
   end
 end
+
+
+
+
+-- Sobmodules
+
+require "content.add_document_to_index"
+require "content.setup_schema"
+require "content.setup_index"
+require "content.query"
+
+require "content.split_header"
+require "content.get_model_definition"
+require "content.get_validator"
+require "content.validate_document"
+
+require "content.read_document"
+require "content.documents"
+require "content.walk_documents"
+require "content.write_file"
 
 return content
