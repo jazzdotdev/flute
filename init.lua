@@ -32,7 +32,7 @@ require "loaders.package"
 
 local theme_loader = require "loaders.themes"
 
-theme_loader.load_themes("packages/themes", "theme2")
+theme_loader.load_themes("packages/themes", torchbear.settings.theme)
 
 local incoming_request_event = events["incoming_request_received"]
 local function request_process_action ()
