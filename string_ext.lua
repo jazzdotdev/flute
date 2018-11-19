@@ -43,3 +43,7 @@ function string.expand (s, ...)
 end
 
 _G.expand = string.expand
+
+function string:capitalize()
+  return self:sub(1,1):upper() .. self:sub(2)
+end
