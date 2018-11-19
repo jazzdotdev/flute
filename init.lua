@@ -16,6 +16,8 @@ _G.luvent = require "third-party.Luvent"
 require "third-party.base64"
 _G.fs = require "fs"
 
+log.level = torchbear.settings.log_level or "info"
+
 fs.create_dir("log")
 log.outfile = "log/lighttouch"
 
