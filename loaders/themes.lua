@@ -42,17 +42,31 @@ local function load_themes(themes_dir, initial_name)
 
     local initial_yaml_table = yaml.to_table(initial_yaml) -- translate yaml to lua table
     
-    for k, v in ipairs(initial_yaml_table.parent) do
-        log.debug("Found theme " .. v)
-        table.insert( themes, v ) -- put the themes names into table
+    if initial_yaml_table.parent ~= nil then
+        for k, v in ipairs(initial_yaml_table.parent) do
+            log.debug("Found theme " .. v .. " as parent for " .. initial_theme_name)
+            table.insert( themes, v ) -- put the themes names into table
+        end
     end
 
-    for k, v in ipairs(themes) do -- copy files to tmp-theme from each theme from intital-theme/config.yaml
-
+    for k, v in ipairs(themes) do -- copy files to tmp-theme from each theme from intital-theme/config.yaml 
+        local theme_yaml = ""
         local theme_name = v
         local path_to_copy = themes_dir_path .. "/" .. theme_name .. "/"
         local dest_path = temp_theme_path .. "/"
         local paths = {}
+
+        for line in io.lines(path_to_copy .. "info.yaml") do
+            theme_yaml = theme_yaml .. "\n" .. line
+        end
+
+        local theme_yaml_table = yaml.to_table(theme_yaml)
+        if theme_yaml_table.parent ~= nil then
+            for k1, v1 in ipairs(theme_yaml_table.parent) do
+                log.debug("Found theme " .. v1 .. " as parent for " .. v)
+                table.insert(themes, v1)
+            end
+        end
 
         repeat
 
