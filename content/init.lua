@@ -1,12 +1,20 @@
 require "content.content_base"
+
+require "content.add_document_to_index"
+require "content.setup_schema"
+require "content.setup_index"
+require "content.query"
+
 require "content.split_header"
 require "content.get_model_definition"
 require "content.get_validator"
 require "content.validate_document"
+
 require "content.read_document"
 require "content.documents"
 require "content.walk_documents"
 require "content.write_file"
+
 
 -- Methods for the model class
 local model_metatable = {}
