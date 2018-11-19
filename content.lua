@@ -7,6 +7,27 @@ local content = {
 
 fs.create_dir("content/home", true)
 
+
+
+function add_document_to_index (doc_id, store_id, file_content, model)
+
+  if not model then
+    log.warn("Document " .. doc_id .. " in " .. store_id .. " does not have a model")
+    return
+  end
+
+  local doc = tan.new_document()
+  doc:add_text(content.fields.uuid, doc_id)
+  doc:add_text(content.fields.store, store_id)
+  doc:add_text(content.fields.model, model)
+  doc:add_text(content.fields.content, file_content)
+  content.index_writer:add_document(doc)
+end
+
+
+
+
+
 function content.split_header (document_text)
     local yaml_text, body = document_text:match("(.-)\n%.%.%.*\n?(.*)")
     local header = yaml.to_table(yaml_text)
@@ -167,7 +188,7 @@ function content.walk_documents (query, fn)
   end
 end
 
-function content.write_file (store_id, file_uuid, fields, body_param)
+function content.write_file (store_id, file_uuid, fields, body)
   local dir = content.stores[store_id]
   if not dir then
     dir = "content/" .. store_id .. "/"
@@ -180,13 +201,24 @@ function content.write_file (store_id, file_uuid, fields, body_param)
     fields.creation_time = tostring(time.now())
   end
   
-  local body = yaml.from_table(fields) .. "\n...\n" .. (body_param or "")
+  local file_content = yaml.from_table(fields) .. "\n...\n" .. (body or "")
   local file = io.open(path, "w")
   if not file then
     log.error("Could not open file", path)
   end
-  file:write(body)
+  file:write(file_content)
   file:close()
+
+  -- Write the document into tantivy's index
+  add_document_to_index(
+    file_uuid,
+    store_id,
+    file_content,
+    fields.model
+  )
+  content.index_writer:commit()
+  content.index:load_searchers()
+
 
   events["document_created"]:trigger({
     store_id = store_id,
@@ -230,48 +262,41 @@ function content.setup_index (path)
   path = path or "./tantivy-index"
 
   --TODO: implement fs.remove_dir(path, true)
-  os.execute("rm -r " .. path)
-  fs.create_dir(path, true)
+  --os.execute("rm -r " .. path)
+  --fs.create_dir(path, true)
 
-  content.index = tan.index_in_dir(path, content.schema)
+  content.index = tan.index_in_ram(content.schema)
 
-  local index_writer = content.index:writer(50000000)
-
-  function add_document (doc_id, store_id)
-
-    -- Would use content.read_document but it doesn't return the file contents
-    local path = content.stores[store_id] .. doc_id
-
-    local file_content = fs.read_file(path)
-    if not file_content then
-      error("could not open " .. path)
-    end
-
-    local doc_fields = content.split_header(file_content)
-
-    if doc_fields.model then
-      local doc = tan.new_document()
-      doc:add_text(content.fields.uuid, doc_id)
-      doc:add_text(content.fields.store, store_id)
-      doc:add_text(content.fields.model, doc_fields.model)
-      doc:add_text(content.fields.content, file_content)
-      index_writer:add_document(doc)
-    else
-      log.warn("Document " .. doc_id .. " in " .. store_id .. " does not have a model")
-    end
-  end
+  content.index_writer = content.index:writer(50000000)
 
 
   -- Walk through all documents and add them to the index
   for store_id, dir in pairs(content.stores) do
     if fs.exists(dir) then
       for doc_id in fs.entries(dir) do
-        add_document(doc_id, store_id)
+
+
+        -- Would use content.read_document but it doesn't return the file contents
+        local path = content.stores[store_id] .. doc_id
+
+        local file_content = fs.read_file(path)
+        if not file_content then
+          error("could not open " .. path)
+        end
+
+        local doc_fields = content.split_header(file_content)
+
+        add_document_to_index(
+          doc_id,
+          store_id,
+          file_content,
+          doc_fields.model
+        )
       end
     end
   end
 
-  index_writer:commit()
+  content.index_writer:commit()
   content.index:load_searchers()
 end
 
