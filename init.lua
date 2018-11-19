@@ -30,6 +30,9 @@ _G.keys = require "keys"
 
 require "loaders.package"
 
+local model_loader = require "loaders.models"
+model_loader.load_models(torchbear.settings.models_path)
+
 local incoming_request_event = events["incoming_request_received"]
 local function request_process_action ()
     local request_uuid = uuid.v4()
