@@ -31,11 +31,11 @@ _G.keys = require "keys"
 require "loaders.package"
 
 local incoming_request_event = events["incoming_request_received"]
-local function request_process_action ()
+local function request_process_action (arguments)
     local request_uuid = uuid.v4()
     log.info("\tNew request received: " .. request_uuid)
 
-    local request = ctx.msg
+    local request = arguments.request
     request.path_segments = request.path:split("/")
     request.uuid = request_uuid
 end
@@ -43,7 +43,8 @@ incoming_request_event:addAction(request_process_action)
 incoming_request_event:setActionPriority(request_process_action, 100)
 
 local outgoing_response_event = events["outgoing_response_about_to_be_sent"]
-local function response_process_action ()
+local function response_process_action (arguments)
+    local response = arguments.response
     local response_uuid = uuid.v4()
     response.uuid = response_uuid
     log.info("\tSending response: " .. response_uuid)
@@ -79,6 +80,8 @@ events["lighttouch_loaded"]:trigger()
 
 -- Handler function
 return function (request)
+  _G.lighttouch_response = nil
+
   local event_parameters = { }
   event_parameters["request"] = request
   events["incoming_request_received"]:trigger(event_parameters)
@@ -86,5 +89,5 @@ return function (request)
     v.rule(request)
   end
    
-  return response
+  return lighttouch_response
 end

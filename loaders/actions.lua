@@ -90,9 +90,9 @@ for k, package_name in pairs (fs.directory_list(_G.packages_path)) do
                         possibleResponse = action_require.action(action_arguments)
                         if possibleResponse ~= nil then
                             if possibleResponse.body ~= nil then
-                                _G.response = possibleResponse
+                                _G.lighttouch_response = possibleResponse
                                 if events["outgoing_response_about_to_be_sent"] then
-                                    events["outgoing_response_about_to_be_sent"]:trigger()
+                                    events["outgoing_response_about_to_be_sent"]:trigger({response = possibleResponse})
                                 end
                             end
                         end
