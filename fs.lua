@@ -1,3 +1,10 @@
+function fs.to_dir_name (path)
+    if path.sub(-1, -1) ~= "/" then
+        path = path .. "/"
+    end
+    return path
+end
+
 function fs.read_file(path)
     local file = io.open(path, "r")
 

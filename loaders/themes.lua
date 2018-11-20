@@ -52,11 +52,13 @@ local function load_themes(themes_dir, initial_name)
 
         repeat
 
+            log.trace("Path to copy: " .. path_to_copy)
             local files_in_dir = fs.read_dir(path_to_copy) -- get files from theme main or theme subdirectory
             for _, file_name in ipairs(files_in_dir) do
                 local file_path = path_to_copy .. file_name
                 local dest_of_file = dest_path .. file_name
-                if not fs.exists(dest_of_file) and string.sub( file_name, -1 ) ~= '/' then -- if file not exist and file is not directory
+                log.trace("Copy: " .. file_path .. " -> " .. dest_of_file)
+                if not fs.exists(dest_of_file) and fs.is_file(file_path) then -- if file not exist and file is not directory
                     fs_lua.copy(file_path, dest_of_file)
                 end
             end
@@ -64,7 +66,7 @@ local function load_themes(themes_dir, initial_name)
 
                 for k, v in pairs(dirs) do
 
-                    table.insert( paths, v)
+                    table.insert( paths, path_to_copy .. v)
                 end
                 
                 -- update paths
