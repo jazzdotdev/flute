@@ -1,3 +1,4 @@
+-- Lighttouch · Torchbear App
 
 local address = torchbear.settings.address or "localhost"
 local host = torchbear.settings.host or "3000"
