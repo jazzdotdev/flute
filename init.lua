@@ -34,7 +34,7 @@ require "loaders.package"
 local theme_loader = require "loaders.themes"
 
 if torchbear.settings.theme then
-  theme_loader.load_themes("packages/themes", torchbear.settings.theme)
+  theme_loader.load_themes("themes", torchbear.settings.theme)
 end
 
 local incoming_request_event = events["incoming_request_received"]
