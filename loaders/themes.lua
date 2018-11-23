@@ -2,13 +2,13 @@ local fs_lua = require("fs")
 
 local function load_themes(themes_dir, initial_name)
 
-    os.execute("rm -r temp-theme") -- remove old temp-theme
-    fs.create_dir("temp-theme") -- create tmp-thme dir
-
     local themes_dir_path = themes_dir -- take themes dir from function arguments
     local initial_theme_name = initial_name -- take initial theme name from function arguments
     local temp_theme_path = "temp-theme" -- path for temp-theme
     local themes = {}
+
+    os.execute("rm -r " .. temp_theme_path) -- remove old temp-theme
+    fs.create_dir(temp_theme_path) -- create new temp-theme dir
 
     local initial_theme_path = themes_dir_path .. "/" .. initial_theme_name
     local initial_config_path = initial_theme_path .. "/" .. "info.yaml" -- open info.yaml from initial
@@ -31,7 +31,7 @@ local function load_themes(themes_dir, initial_name)
         end
     end
 
-    for k, v in ipairs(themes) do -- copy files to tmp-theme from each parent of each theme 
+    for k, v in ipairs(themes) do -- copy files to temp-theme from each parent of each theme 
         local theme_yaml = ""
         local theme_name = v
         local path_to_copy = themes_dir_path .. "/" .. theme_name .. "/"
@@ -72,7 +72,7 @@ local function load_themes(themes_dir, initial_name)
                 -- update paths
                 if paths[1] ~= nil then
                     
-                    path_to_copy = paths[1]
+                    path_to_copy = paths[1] .. "/"
                     dest_path = temp_theme_path
                     local path_modules = path_to_copy:split("/")
                     table.remove( path_modules, 1 )
