@@ -77,11 +77,6 @@ end
 
 log.info("[loaded] LightTouch")
 
-content.setup_schema()
-content.setup_index()
-
-log.info("[loaded] Tantivy index")
-
 events["lighttouch_loaded"]:trigger()
 
 

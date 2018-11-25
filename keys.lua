@@ -4,17 +4,20 @@
 local keys = {}
 
 function get_profile ()
-  return content.walk_documents("+store:home +model:profile",
+  return content.walk_documents("home",
     function (file_uuid, header, body)
-      return file_uuid, header.name
+      if header.model == "profile" then
+        return file_uuid, header.name
+      end
     end
   )
 end
 
 function keys.get_private_key ()
-  local priv_key = content.walk_documents("+store:home +model:key",
+  local priv_key = content.walk_documents("home",
     function (file_uuid, header, body)
-      if header.kind == "sign_private"
+      if header.model == "key"
+      and header.kind == "sign_private"
       then
         return body
       end
@@ -43,10 +46,9 @@ function keys.verify_http_signature (message)
   log.debug("keyId", keyId)
   log.debug("signature", signature)
 
-  local query = '+model:key +store:"' .. keyId .. '"'
-  local pub_key = content.walk_documents(query,
-    function (file_uuid, fields, body)
-      if fields.kind == "sign_public" then
+  local pub_key = content.walk_documents(keyId,
+    function (file_uuid, header, body)
+      if header.model == "key" and header.kind == "sign_public" then
         return body
       end
     end

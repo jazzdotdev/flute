@@ -1,6 +1,4 @@
 
-local valua = require "third-party.valua"
-
 function content.get_validator (name)
     local model_def, err = content.get_model_definition(name)
     if not model_def then return nil, err end
