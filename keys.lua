@@ -79,15 +79,13 @@ function keys.sign_http_message (message)
   local profile_uuid = get_profile()
 
   if not profile_uuid then
-    log.error("Could not sign: No home profile found")
-    return false
+    return false, "No home profile found"
   end
 
   local priv_key = keys.get_private_key()
 
   if not priv_key then
-    log.error("Could not sign: No private key for home profile")
-    return false
+    return false, "No private key for home profile"
   end
 
   if not message.headers.date then
