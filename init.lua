@@ -37,6 +37,9 @@ if torchbear.settings.theme then
   theme_loader.load_themes("themes", torchbear.settings.theme)
 end
 
+local model_loader = require "loaders.models"
+model_loader.load_models(torchbear.settings.models_path)
+
 local incoming_request_event = events["incoming_request_received"]
 local function request_process_action (arguments)
     local request_uuid = uuid.v4()
