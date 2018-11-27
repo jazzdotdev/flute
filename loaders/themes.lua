@@ -93,8 +93,8 @@ local function load_themes(themes_dir, initial_name)
         log.debug("Themes loop ended")
     end
 
-    tera.extend(temp_theme_path .. "/**/*")
-    tera.reload()
+    tera.instance:extend(temp_theme_path .. "/**/*")
+    tera.instance:reload()
 end    
 
 return{
