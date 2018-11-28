@@ -30,7 +30,7 @@ _G.count_pairs = function (iter)
   return n
 end
 
-function _G.sorted_pairs(t, order)
+function table.sorted_pairs(t, order)
    -- collect the keys 
   local keys = {} 
   for k in pairs(t) do keys[#keys+1] = k end 
@@ -51,4 +51,19 @@ function _G.sorted_pairs(t, order)
       return keys[i], t[keys[i]] 
     end 
   end 
-end 
+end
+
+function table.contains(tab, val)
+  for k, v in pairs(tab) do
+    if v == val then return true end
+  end
+  return false
+end
+
+function table:copy ()
+  local t = {}
+  for k, v in pairs(self) do
+    t[k] = v
+  end
+  return t
+end
