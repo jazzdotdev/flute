@@ -1,5 +1,5 @@
-require "key.keys_base"
-require "key.sign_http_message"
-require "key.verify_http_signature"
+require "keys.base"
+require "keys.sign_http_message"
+require "keys.verify_http_signature"
 
 return keys
