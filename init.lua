@@ -39,9 +39,6 @@ if torchbear.settings.theme then
   theme_loader.load_themes("themes", torchbear.settings.theme)
 end
 
-_G.model_loader = require "loaders.models"
-model_loader.load_models(torchbear.settings.models_path or "models")
-
 function _G.render (file, data)
   return tera.instance:render(file, data)
 end
