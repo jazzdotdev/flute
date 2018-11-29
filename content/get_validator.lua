@@ -1,7 +1,9 @@
 
 function content.get_validator (name)
-    local model_def, err = content.get_model_definition(name)
-    if not model_def then return nil, err end
+    local model_def = models[name]
+    if not model_def then
+      return nil, "Model " .. name .. " not found"
+    end
   
     for name, field_def in pairs(model_def.fields) do
       local validator = valua:new()
