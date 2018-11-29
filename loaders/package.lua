@@ -24,6 +24,7 @@ package.path = package.path..";./packages/?.lua"
 require "loaders.events"
 require "loaders.actions"
 require "loaders.rules"
+require "loaders.models"
 
 -- everything is loaded now
 os.remove("module.lua")
