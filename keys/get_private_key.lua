@@ -1,4 +1,4 @@
-function get_private_key ()
+function keys.get_private_key ()
     local priv_key = content.walk_documents("home",
       function (file_uuid, header, body)
         if header.model == "key"

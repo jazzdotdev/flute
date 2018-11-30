@@ -1,4 +1,4 @@
-function verify_http_signature (message)
+function keys.verify_http_signature (message)
 
   -- TODO: The headers part of the signature header is being ignored.
   -- every header listed in headers, separated with spaces, must be included

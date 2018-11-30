@@ -1,4 +1,4 @@
-function witness_document (document_id)
+function keys.witness_document (document_id)
     local date = tostring(time.now())
   
     local profile_uuid = get_profile()
