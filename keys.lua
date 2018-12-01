@@ -4,7 +4,7 @@
 local keys = {}
 
 function get_profile ()
-  return content.walk_documents("home",
+  return content.walk_documents(content.home,
     function (file_uuid, header, body)
       if header.model == "profile" then
         return file_uuid, header.name
@@ -14,7 +14,7 @@ function get_profile ()
 end
 
 function keys.get_private_key ()
-  local priv_key = content.walk_documents("home",
+  local priv_key = content.walk_documents(content.home,
     function (file_uuid, header, body)
       if header.model == "key"
       and header.kind == "sign_private"
@@ -136,7 +136,7 @@ function keys.witness_document (document_id)
     signature = signature
   }
 
-  content.write_file("home", witness_id, witness_fields, "")
+  content.write_file(content.home, witness_id, witness_fields, "")
 
   return witness_id
 end
