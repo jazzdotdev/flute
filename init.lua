@@ -29,7 +29,7 @@ require "string_ext"
 require "underscore_alias"
 
 _G.content = require "content.init"
-_G.keys = require "keys"
+_G.keys = require "keys.mod"
 
 -- Get home-store uuid
 local home_store = fs.read_file("home-store.txt")
