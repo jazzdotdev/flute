@@ -28,7 +28,7 @@ require "table_ext"
 require "string_ext"
 require "underscore_alias"
 
-_G.content = require "content.init"
+_G.content = require "content.mod"
 _G.keys = require "keys"
 
 -- Get home-store uuid
