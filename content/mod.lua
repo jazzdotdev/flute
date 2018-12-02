@@ -1,4 +1,4 @@
-require "content.content_base"
+require "content.base"
 require "content.split_header"
 require "content.get_validator"
 require "content.validate_document"
