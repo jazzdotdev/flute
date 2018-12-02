@@ -68,8 +68,6 @@ package.searchers[2] = function(name)
                 created_file:write("\n\telse")
                 created_file:write("\n\t\tlog.trace(\"Rule " .. _G.ansicolors('%{underline}' .. modulename) .. " evaluated as FALSE \")")
                 created_file:write("\n\tend")
-
-                created_file:write("\n\tlog.debug('[Rule] " .. _G.ansicolors('%{underline}' .. modulename) .. " evaluated succesfully')")
                 created_file:write("\nend\n") -- bottom rule function wrapper
                 
                 created_file:write("\nlocal function get_events_parameters(events_actions)")
