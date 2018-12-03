@@ -39,7 +39,7 @@ package.searchers[2] = function(name)
                     end
                 end
                 created_file:write(")")
-                created_file:write("\n\tlog.debug('[Rule] " .. _G.ansicolors('%{underline}' .. modulename) .. " with priority " .. priority .. " starting to evaluate')")
+                created_file:write("\n\tlog.debug('[evaluating] " .. _G.ansicolors('%{underline}' .. modulename) .. " with priority " .. priority .. " starting to evaluate')")
                 created_file:write("\n\tlocal arguments_strings_dictionary = { }")
                 created_file:write("\n\targuments_strings_dictionary[\"" .. rule_yaml_table.input_parameter .. "\"] = " .. rule_yaml_table.input_parameter)
                 for k, v in pairs (_G.every_events_actions_parameters) do -- matching rule arguments with action required parameters, so events_parameters["p1"] = p1
@@ -68,8 +68,6 @@ package.searchers[2] = function(name)
                 created_file:write("\n\telse")
                 created_file:write("\n\t\tlog.trace(\"Rule " .. _G.ansicolors('%{underline}' .. modulename) .. " evaluated as FALSE \")")
                 created_file:write("\n\tend")
-
-                created_file:write("\n\tlog.debug('[Rule] " .. _G.ansicolors('%{underline}' .. modulename) .. " evaluated succesfully')")
                 created_file:write("\nend\n") -- bottom rule function wrapper
                 
                 created_file:write("\nlocal function get_events_parameters(events_actions)")
