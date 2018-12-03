@@ -1,11 +1,10 @@
 content = {
-    stores = {
-      home = "content/home/"
-    }
+  stores = {
+    home = "content/home/"
   }
-  local valua = require "third-party.valua"
+}
 
-  -- Methods for the model class
+-- Methods for the model class
 local model_metatable = {}
 model_metatable.__index = model_metatable
 function model_metatable:validate (object)
