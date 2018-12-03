@@ -5,8 +5,6 @@ content = {
   }
   local valua = require "third-party.valua"
 
-return content
-
   -- Methods for the model class
 local model_metatable = {}
 model_metatable.__index = model_metatable
@@ -29,5 +27,3 @@ end
 
 
   fs.create_dir("content/home", true)
-
-  
