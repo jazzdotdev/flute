@@ -9,9 +9,9 @@ function content.setup_schema ()
   content.schema = builder:build()
 
   content.fields = {
-    uuid = content.schema:get_field("uuid"),
-    store = content.schema:get_field("store"),
-    model = content.schema:get_field("model"),
-    content = content.schema:get_field("content"),
+  uuid = content.schema:get_field("uuid"),
+  store = content.schema:get_field("store"),
+  model = content.schema:get_field("model"),
+  content = content.schema:get_field("content"),
   }
 end

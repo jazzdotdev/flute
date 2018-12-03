@@ -12,20 +12,20 @@ end
 _G.mean = function (iter)
   local sum, count = 0, 0
   each(iter, function (x)
-    sum = sum + x
-    count = count + 1
+  sum = sum + x
+  count = count + 1
   end)
   if count == 0 then
-    return 0
+  return 0
   else
-    return sum / count
+  return sum / count
   end
 end
 
 _G.count_pairs = function (iter)
   local n = 0
   for _ in pairs(iter) do
-    n = n+1
+  n = n+1
   end
   return n
 end
@@ -38,24 +38,24 @@ function table.sorted_pairs(t, order)
   -- if order function given, sort by it by passing the table and keys a, b, 
   -- otherwise just sort the keys  
   if order then 
-    table.sort(keys, function(a,b) return order(t, a, b) end) 
+  table.sort(keys, function(a,b) return order(t, a, b) end) 
   else 
-    table.sort(keys) 
+  table.sort(keys) 
   end 
 
   -- return the iterator function 
   local i = 0 
   return function() 
-    i = i + 1 
-    if keys[i] then 
-      return keys[i], t[keys[i]] 
-    end 
+  i = i + 1 
+  if keys[i] then 
+    return keys[i], t[keys[i]] 
+  end 
   end 
 end
 
 function table.contains(tab, val)
   for k, v in pairs(tab) do
-    if v == val then return true end
+  if v == val then return true end
   end
   return false
 end
@@ -63,7 +63,7 @@ end
 function table:copy ()
   local t = {}
   for k, v in pairs(self) do
-    t[k] = v
+  t[k] = v
   end
   return t
 end
