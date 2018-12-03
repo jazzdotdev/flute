@@ -1,13 +1,13 @@
-require "content.content_base"
-require "content.split_header"
-require "content.get_validator"
-require "content.validate_document"
-require "content.read_document"
-require "content.documents"
-require "content.walk_documents"
-require "content.write_file"
+content = {
+    stores = {
+      home = "content/home/"
+    }
+  }
+  local valua = require "third-party.valua"
 
--- Methods for the model class
+return content
+
+  -- Methods for the model class
 local model_metatable = {}
 model_metatable.__index = model_metatable
 function model_metatable:validate (object)
@@ -27,4 +27,7 @@ for entry in fs.entries("content/") do
   end
 end
 
-return content
+
+  fs.create_dir("content/home", true)
+
+  
