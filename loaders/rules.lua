@@ -1,6 +1,5 @@
 extract_yaml = function(modulepath)
   local rule_yaml = ""
-  local rule_yaml_table
   local line_num = 0
   for line in io.lines(modulepath .. ".lua") do
     line_num = line_num + 1
@@ -11,8 +10,7 @@ extract_yaml = function(modulepath)
   return yaml.to_table(rule_yaml)
 end
 
-set_priority = function(rule_yaml_table, created_file)
-  local priority = rule_yaml_table.priority or 1
+set_priority = function(rule_yaml_table, created_file, priority)
   if priority > 100 then priority = 100 end
 
   created_file:write("local priority = " .. priority)
@@ -32,7 +30,7 @@ set_input_parameter = function(rule_yaml_table, created_file)
   created_file:write("\nlocal input_parameter = \"" .. rule_yaml_table.input_parameter .. "\"")
 end
 
-set_rule_function = function(rule_yaml_table, created_file)
+set_rule_function = function(rule_yaml_table, created_file, modulename, priority, modulepath)
   created_file:write("\nlocal events_parameters = { }")
   created_file:write("\nlocal function rule(" .. rule_yaml_table.input_parameter)
     for k, v in pairs (_G.every_events_actions_parameters) do
@@ -104,12 +102,13 @@ package.searchers[2] = function(name)
       local filename = string.gsub(path, "%?", modulepath)
       local file = io.open(filename, "rb")
       if file then
-        rule_yaml_table = extract_yaml(modulepath)
+        local rule_yaml_table = extract_yaml(modulepath)
+        local priority = rule_yaml_table.priority or 1
 
-        set_priority(rule_yaml_table, created_file)
+        set_priority(rule_yaml_table, created_file, priority)
         set_events_table(rule_yaml_table, created_file)
         set_input_parameter(rule_yaml_table, created_file)
-        set_rule_function(rule_yaml_table, created_file)
+        set_rule_function(rule_yaml_table, created_file, modulename, priority, modulepath)
         set_get_events_parameters(rule_yaml_table, created_file)
         call_return(rule_yaml_table, created_file)
 

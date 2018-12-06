@@ -91,7 +91,7 @@ function _G.send_request (request)
   local response = client_request.send(request)
   response.uuid = uuid.v4()
   events["incoming_response_received"]:trigger({ response = response })
-  
+
   return response
 end
 
@@ -110,6 +110,6 @@ return function (request)
   for k, v in pairs(rules) do
     v.rule(request)
   end
-   
+
   return lighttouch_response
 end
