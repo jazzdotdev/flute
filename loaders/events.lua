@@ -1,19 +1,14 @@
-for k, package_name in pairs (fs.directory_list(_G.packages_path)) do
-  local events_strings = { } -- events names table
+count_lines = function(events_strings)
   local event_count = 0
-  local package_path = _G.packages_path .. "/" .. package_name .. "/"
-  log.trace("[patching] actions for package " .. ansicolors('%{underline}' .. package_name))
-
-  -- put each line into a strings array
-  for line in fs.read_lines(package_path .. "events.txt") do
-    table.insert( events_strings, line )
-  end
-
   -- count the lines
   for _ in pairs(events_strings) do
     event_count = event_count + 1
   end
 
+  return event_count
+end
+
+create_events = function(event_count, events_strings)
   -- create events
   for i=1, event_count do
     local name = events_strings[i]
@@ -27,7 +22,9 @@ for k, package_name in pairs (fs.directory_list(_G.packages_path)) do
       log.debug("[triggering] event"  .. ansicolors('%{underline}' .. name) )
     end)
   end
+end
 
+read_disabled_actions = function(package_path)
   -- read disabled actions
   local disabled_actions = { }
   for line in fs.read_lines(package_path .. "disabled_actions.txt") do
@@ -43,6 +40,24 @@ for k, package_name in pairs (fs.directory_list(_G.packages_path)) do
 
     return false
   end
+end
+
+for k, package_name in pairs (fs.directory_list(_G.packages_path)) do
+  local events_strings = { } -- events names table
+  local event_count = 0
+  local package_path = _G.packages_path .. "/" .. package_name .. "/"
+  log.trace("[patching] actions for package " .. ansicolors('%{underline}' .. package_name))
+
+  -- put each line into a strings array
+  for line in fs.read_lines(package_path .. "events.txt") do
+    table.insert( events_strings, line )
+  end
+
+  event_count = count_lines(events_strings)
+
+  create_events(event_count, events_strings)
+
+  read_disabled_actions(package_path)
 end
 
 events["lighttouch_loaded"] = luvent.newEvent()
