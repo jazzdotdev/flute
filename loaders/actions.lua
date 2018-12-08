@@ -1,4 +1,4 @@
-extract_yaml = function(modulepath)
+function get_and_decode_yaml (modulepath)
   local action_yaml = ""
   local line_num = 0
   for line in io.lines(modulepath .. ".lua") do
@@ -6,10 +6,11 @@ extract_yaml = function(modulepath)
     action_yaml = action_yaml .. line .. "\n" -- get only yaml lines
     if line_num == 3 then break end
   end
+
   return yaml.to_table(action_yaml) -- decode yaml to lua table
 end
 
-set_events = function(action_yaml_table, created_file)
+function write_events (created_file, action_yaml_table)
   created_file:write("local event = { \"" .. action_yaml_table.event[1] .. "\"") -- put values from yaml in lua form
   for _, yaml_event in ipairs(action_yaml_table.event) do
     if yaml_event ~= action_yaml_table.event[1] then
@@ -19,11 +20,11 @@ set_events = function(action_yaml_table, created_file)
   created_file:write(" }")
 end
 
-set_priority = function(action_yaml_table, created_file)
+function set_priority (created_file, action_yaml_table)
   created_file:write("\nlocal priority = " .. action_yaml_table.priority .. " \n\n")
 end
 
-set_input_parameters = function(action_yaml_table, created_file)
+function write_input_parameters (created_file, action_yaml_table)
   if action_yaml_table.input_parameters[1] then
     created_file:write("local input_parameters = { " .. "\"" .. action_yaml_table.input_parameters[1] .. "\"")
     for k, v in pairs(action_yaml_table.input_parameters) do
@@ -36,7 +37,7 @@ set_input_parameters = function(action_yaml_table, created_file)
   end
 end
 
-set_action_function = function(action_yaml_table, created_file, modulepath)
+function write_function (created_file, action_yaml_table, modulepath)
   created_file:write("local function action(arguments)\n") -- function wrapper
   for k, v in pairs(action_yaml_table.input_parameters) do
     created_file:write("\n\tlocal " .. v .. " = " .. "arguments[\"" .. v .. "\"]")
@@ -51,7 +52,7 @@ set_action_function = function(action_yaml_table, created_file, modulepath)
   created_file:write("\nend")
 end
 
-call_return = function(action_yaml_table, created_file)
+function write_return (created_file, action_yaml_table)
   created_file:write("\n\nreturn{\n\tevent = event,\n\taction = action,\n\tpriority = priority,\n\tinput_parameters = input_parameters\n}") -- ending return
 end
 
@@ -65,13 +66,13 @@ package.searchers[2] = function(name)
       local filename = string.gsub(path, "%?", modulepath)
       local file = io.open(filename, "rb")
       if file then
-        local action_yaml_table = extract_yaml(modulepath)
+        local action_yaml_table = get_and_decode_yaml(modulepath)
 
-        set_events(action_yaml_table, created_file)
-        set_priority(action_yaml_table, created_file)
-        set_input_parameters(action_yaml_table, created_file)
-        set_action_function(action_yaml_table, created_file, modulepath)
-        call_return(action_yaml_table, created_file)
+        write_events(created_file, action_yaml_table)
+        set_priority(created_file, action_yaml_table)
+        write_input_parameters(created_file, action_yaml_table)
+        write_function(created_file, action_yaml_table, modulepath)
+        write_return(created_file, action_yaml_table)
 
         created_file:close()
         -- Compile and return the module
