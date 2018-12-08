@@ -85,10 +85,8 @@ package.searchers[2] = function(name)
     return default_package_searchers2(name)
   end
 end
---
 
--- actions requiring
-for k, package_name in pairs (fs.directory_list(_G.packages_path)) do
+function create_actions (package_name)
   local package_path = _G.packages_path .. "/" .. package_name .. "/"
   local actions_path = package_path .. "actions/"
   local action_files = {} -- actions path is optional
@@ -135,3 +133,7 @@ for k, package_name in pairs (fs.directory_list(_G.packages_path)) do
   log.trace("[patched] actions for package " .. ansicolors('%{underline}' .. package_name))
 end
 --
+
+-- actions requiring
+-- runs the function against all packages in packages_path
+foreach(fs.directory_list(_G.packages_path), create_actions)

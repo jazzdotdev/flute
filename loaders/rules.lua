@@ -1,4 +1,4 @@
-extract_yaml = function(modulepath)
+function extract_yaml (modulepath)
   local rule_yaml = ""
   local line_num = 0
   for line in io.lines(modulepath .. ".lua") do
@@ -10,13 +10,13 @@ extract_yaml = function(modulepath)
   return yaml.to_table(rule_yaml)
 end
 
-set_priority = function(rule_yaml_table, created_file, priority)
+function write_priority (created_file, rule_yaml_table, priority)
   if priority > 100 then priority = 100 end
 
   created_file:write("local priority = " .. priority)
 end
 
-set_events_table = function(rule_yaml_table, created_file)
+function write_events_table (created_file, rule_yaml_table)
   created_file:write("\nlocal events_table = { " .. "\"" .. rule_yaml_table.events_table[1] .. "\"")
   for k, v in pairs(rule_yaml_table.events_table) do
     if k ~= 1 then
@@ -26,11 +26,11 @@ set_events_table = function(rule_yaml_table, created_file)
   created_file:write("}")
 end
 
-set_input_parameter = function(rule_yaml_table, created_file)
+function write_input_parameter (created_file, rule_yaml_table)
   created_file:write("\nlocal input_parameter = \"" .. rule_yaml_table.input_parameter .. "\"")
 end
 
-set_rule_function = function(rule_yaml_table, created_file, modulename, priority, modulepath)
+function write_rule_function (created_file, rule_yaml_table, modulename, priority, modulepath)
   created_file:write("\nlocal events_parameters = { }")
   created_file:write("\nlocal function rule(" .. rule_yaml_table.input_parameter)
     for k, v in pairs (_G.every_events_actions_parameters) do
@@ -73,7 +73,7 @@ set_rule_function = function(rule_yaml_table, created_file, modulename, priority
   created_file:write("\nend\n") -- bottom rule function wrapper
 end
 
-set_get_events_parameters = function(rule_yaml_table, created_file)
+function write_get_events_parameters (created_file, rule_yaml_table)
   created_file:write("\nlocal function get_events_parameters(events_actions)")
     created_file:write("\n\tfor k, v in pairs(events_table) do")
       created_file:write("\n\t\tfor k1, v1 in pairs(events_actions[v]) do")
@@ -87,7 +87,7 @@ set_get_events_parameters = function(rule_yaml_table, created_file)
   created_file:write("\nend")
 end
 
-call_return = function(rule_yaml_table, created_file)
+function write_return (created_file, rule_yaml_table)
   created_file:write("\nreturn{\n\trule = rule,\n\tpriority = priority,\n\tget_events_parameters = get_events_parameters\n}")
   -- Compile and return the module
 end
@@ -105,12 +105,12 @@ package.searchers[2] = function(name)
         local rule_yaml_table = extract_yaml(modulepath)
         local priority = rule_yaml_table.priority or 1
 
-        set_priority(rule_yaml_table, created_file, priority)
-        set_events_table(rule_yaml_table, created_file)
-        set_input_parameter(rule_yaml_table, created_file)
-        set_rule_function(rule_yaml_table, created_file, modulename, priority, modulepath)
-        set_get_events_parameters(rule_yaml_table, created_file)
-        call_return(rule_yaml_table, created_file)
+        write_priority(created_file, rule_yaml_table, priority)
+        write_events_table(created_file, rule_yaml_table)
+        write_input_parameter(created_file, rule_yaml_table)
+        write_rule_function(created_file, rule_yaml_table, modulename, priority, modulepath)
+        write_get_events_parameters(created_file, rule_yaml_table)
+        write_return(created_file, rule_yaml_table)
 
         created_file:close()
         local to_compile = io.open("module.lua", "rb")
@@ -123,9 +123,7 @@ package.searchers[2] = function(name)
   end
 end
 
--- interpreted rules requiring
-for k, package_name in pairs(fs.directory_list(_G.packages_path)) do
-
+function create_rules (package_name)
   local rules_path = _G.packages_path .. "/".. package_name .. "/rules/"
   local rule_files = {} -- get all rules from this package
   -- Rules path is optional
@@ -145,5 +143,8 @@ for k, package_name in pairs(fs.directory_list(_G.packages_path)) do
       _G.rules_priorities[rule_require_name] = rule_require.priority
     end
   end
-
 end
+
+
+-- Runs the function against all packages in packages_path
+foreach(fs.directory_list(_G.packages_path), create_rules)
