@@ -147,4 +147,4 @@ end
 
 
 -- Runs the function against all packages in packages_path
-foreach(fs.directory_list(_G.packages_path), create_rules)
+each(fs.directory_list(_G.packages_path), create_rules)

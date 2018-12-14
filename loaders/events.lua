@@ -85,4 +85,4 @@ end
 create_base_events()
 
 -- Runs the function against all packages in packages_path
-foreach(fs.directory_list(_G.packages_path), count_and_create_events)
+each(fs.directory_list(_G.packages_path), count_and_create_events)
