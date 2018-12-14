@@ -1,4 +1,5 @@
 function content.walk_documents (_store_id, fn)
+  log.trace("Running: " .. debug.getinfo(1, 'S').source)
   for doc_id, store_id in content.documents(_store_id) do
 
     local path = content.stores[store_id] .. doc_id
@@ -16,4 +17,3 @@ function content.walk_documents (_store_id, fn)
     end
   end
 end
-  
