@@ -58,7 +58,15 @@ local function load_themes(themes_dir, initial_name)
         local file_path = path_to_copy .. file_name
         local dest_of_file = dest_path .. file_name
         log.trace("Copy: " .. file_path .. " -> " .. dest_of_file)
-        if not fs.exists(dest_of_file) and fs.is_file(file_path) then -- if file not exist and file is not directory
+
+        -- to avoid errors with .git and hidden folders 
+        local aproved = true --the element is aproved to be added 
+        if string.find(dest_path, "/.") ~= nil then -- if the element folder name starts with a dot ".git"
+          aproved = false -- the element is not aproved then must be ignored
+        end
+        --end of checking 
+
+        if not fs.exists(dest_of_file) and fs.is_file(file_path) and aproved then -- if file not exist and file is not directory and file not aproved
           fs_lua.copy(file_path, dest_of_file)
         end
       end
