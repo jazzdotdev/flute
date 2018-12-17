@@ -13,7 +13,7 @@ function content.write_file (store_id, file_uuid, fields, body_param)
     fields.creation_time = tostring(time.now())
   end
 
-  local body = scl.from_table(fields) .. "...\n" .. (body_param or "")
+  local body = "---\n" .. scl.from_table(fields) .. "...\n" .. (body_param or "")
   local file = io.open(path, "w")
   if not file then
     log.error("Could not open file", path)
