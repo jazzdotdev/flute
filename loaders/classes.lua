@@ -25,13 +25,24 @@ function load_class_file (file_name)
     return
   end
 
-  local replace_str = "<%1 class=\"\n" .. classes .. "\">"
 
-  -- This *maaay* break if a tag name contains another tag name at the beggining
-  template = string.gsub(template,
-    "<(" .. element_specifier .. "[^>]*)>",
-    replace_str
-  )
+  if element_specifier:sub(1,1) == "#" then
+    -- element id
+    local id = element_specifier:sub(2, -1)
+
+    template = string.gsub(template,
+      "<([^>]*%sid=\"" .. id .. "\"[^>]*)>",
+      "<%1 class=\"\n" .. classes .. "\">"
+    )
+  else
+    -- Tag name case
+
+    -- This *maaay* break if a tag name contains another tag name at the beggining
+    template = string.gsub(template,
+      "<(" .. element_specifier .. "[^>]*)>",
+      "<%1 class=\"\n" .. classes .. "\">"
+    )
+  end
 
   print(template)
 
