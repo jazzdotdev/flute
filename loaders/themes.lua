@@ -75,6 +75,7 @@ local function load_themes(themes_dir, initial_name)
         for k, v in pairs(dirs) do
 
           table.insert( paths, path_to_copy .. v)
+          log.trace("Found directory: " .. v)
         end
 
         -- update paths
@@ -91,6 +92,14 @@ local function load_themes(themes_dir, initial_name)
           dest_path = dest_path .. "/" -- dest path is like temp-theme/templates
 
           os.execute("mkdir -p " .. dest_path) -- create dir in temp-theme/
+
+          dirs = fs_lua.directory_list(path_to_copy) -- get list of directories in current location
+
+          for k, v in pairs(dirs) do
+  
+            table.insert( paths, path_to_copy .. v)
+            log.trace("Found directory: " .. v)
+          end
 
           for _, filename in ipairs(fs.get_all_files_in(path_to_copy)) do
             local src = path_to_copy .. filename
