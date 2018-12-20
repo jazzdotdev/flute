@@ -91,6 +91,12 @@ local function load_themes(themes_dir, initial_name)
           dest_path = dest_path .. "/" -- dest path is like temp-theme/templates
 
           os.execute("mkdir -p " .. dest_path) -- create dir in temp-theme/
+
+          for _, filename in ipairs(fs.get_all_files_in(path_to_copy)) do
+            local src = path_to_copy .. filename
+            local dst = dest_path .. filename
+            fs_lua.copy(src, dst)
+          end
         end
         --
         table.remove( paths, 1 )

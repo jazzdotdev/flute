@@ -48,9 +48,11 @@ content.home = home_store
 require "loaders.package"
 
 local theme_loader = require "loaders.themes"
+local class_loader = require "loaders.classes"
 
 if torchbear.settings.theme then
   theme_loader.load_themes("themes", torchbear.settings.theme)
+  class_loader.load_classes()
 end
 
 function _G.render (file, data)
