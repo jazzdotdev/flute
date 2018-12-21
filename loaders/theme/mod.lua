@@ -1,11 +1,11 @@
 fs_lua = require("fs")
 
 themes = {}
-require("loaders.theme-loader-functions.base")
-require("loaders.theme-loader-functions.get_parent_themes")
-require("loaders.theme-loader-functions.find_directories")
-require("loaders.theme-loader-functions.copy_files")
-require("loaders.theme-loader-functions.copy_files_no_dot_checking")
+require("loaders.theme.base")
+require("loaders.theme.get_parent_themes")
+require("loaders.theme.find_directories")
+require("loaders.theme.copy_files")
+require("loaders.theme.copy_files_no_dot_checking")
 
 local function load_themes(themes_dir, initial_name)
 
