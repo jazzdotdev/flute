@@ -1,24 +1,24 @@
-function extract_yaml (modulepath)
-  local rule_yaml = ""
+function extract_header (modulepath)
+  local header = ""
   local line_num = 0
   for line in io.lines(modulepath .. ".lua") do
     line_num = line_num + 1
-    rule_yaml = rule_yaml .. line .. "\n" -- get only yaml lines
+    header = header .. line .. "\n" -- get only first 3 lines
     if line_num == 3 then break end
   end
 
-  return yaml.to_table(rule_yaml)
+  return scl.to_table(header) -- decode scl string into a lua table
 end
 
-function write_priority (created_file, rule_yaml_table, priority)
+function write_priority (created_file, header, priority)
   if priority > 100 then priority = 100 end
 
   created_file:write("local priority = " .. priority)
 end
 
-function write_events_table (created_file, rule_yaml_table)
-  created_file:write("\nlocal events_table = { " .. "\"" .. rule_yaml_table.events_table[1] .. "\"")
-  for k, v in pairs(rule_yaml_table.events_table) do
+function write_events_table (created_file, header)
+  created_file:write("\nlocal events_table = { " .. "\"" .. header.events_table[1] .. "\"")
+  for k, v in pairs(header.events_table) do
     if k ~= 1 then
       created_file:write(", " .. "\"" .. v .. "\"")
     end
@@ -26,15 +26,15 @@ function write_events_table (created_file, rule_yaml_table)
   created_file:write("}")
 end
 
-function write_input_parameter (created_file, rule_yaml_table)
-  created_file:write("\nlocal input_parameter = \"" .. rule_yaml_table.input_parameter .. "\"")
+function write_input_parameter (created_file, header)
+  created_file:write("\nlocal input_parameter = \"" .. header.input_parameter .. "\"")
 end
 
-function write_rule_function (created_file, rule_yaml_table, modulename, priority, modulepath)
+function write_rule_function (created_file, header, modulename, priority, modulepath)
   created_file:write("\nlocal events_parameters = { }")
-  created_file:write("\nlocal function rule(" .. rule_yaml_table.input_parameter)
+  created_file:write("\nlocal function rule(" .. header.input_parameter)
     for k, v in pairs (_G.every_events_actions_parameters) do
-      if v ~= rule_yaml_table.input_parameter then
+      if v ~= header.input_parameter then
         created_file:write(", " .. v)
       end
     end
@@ -43,9 +43,9 @@ function write_rule_function (created_file, rule_yaml_table, modulename, priorit
     created_file:write("\n\tlog.debug('[evaluating] " .. _G.ansicolors('%{underline}' .. modulename) .. " with priority " .. priority .. " starting to evaluate')")
 
     created_file:write("\n\tlocal arguments_strings_dictionary = { }")
-    created_file:write("\n\targuments_strings_dictionary[\"" .. rule_yaml_table.input_parameter .. "\"] = " .. rule_yaml_table.input_parameter)
+    created_file:write("\n\targuments_strings_dictionary[\"" .. header.input_parameter .. "\"] = " .. header.input_parameter)
     for k, v in pairs (_G.every_events_actions_parameters) do -- matching rule arguments with action required parameters, so events_parameters["p1"] = p1
-      if v ~= rule_yaml_table.input_parameter then
+      if v ~= header.input_parameter then
         created_file:write("\n\targuments_strings_dictionary[\"" .. v .. "\"] = " .. v)
       end
     end
@@ -73,7 +73,7 @@ function write_rule_function (created_file, rule_yaml_table, modulename, priorit
   created_file:write("\nend\n") -- bottom rule function wrapper
 end
 
-function write_get_events_parameters (created_file, rule_yaml_table)
+function write_get_events_parameters (created_file, header)
   created_file:write("\nlocal function get_events_parameters(events_actions)")
     created_file:write("\n\tfor k, v in pairs(events_table) do")
       created_file:write("\n\t\tfor k1, v1 in pairs(events_actions[v]) do")
@@ -87,7 +87,7 @@ function write_get_events_parameters (created_file, rule_yaml_table)
   created_file:write("\nend")
 end
 
-function write_return (created_file, rule_yaml_table)
+function write_return (created_file, header)
   created_file:write("\nreturn{\n\trule = rule,\n\tpriority = priority,\n\tget_events_parameters = get_events_parameters\n}")
   -- Compile and return the module
 end
@@ -102,15 +102,15 @@ package.searchers[2] = function(name)
       local filename = string.gsub(path, "%?", modulepath)
       local file = io.open(filename, "rb")
       if file then
-        local rule_yaml_table = extract_yaml(modulepath)
-        local priority = rule_yaml_table.priority or 1
+        local header = extract_header(modulepath)
+        local priority = header.priority or 1
 
-        write_priority(created_file, rule_yaml_table, priority)
-        write_events_table(created_file, rule_yaml_table)
-        write_input_parameter(created_file, rule_yaml_table)
-        write_rule_function(created_file, rule_yaml_table, modulename, priority, modulepath)
-        write_get_events_parameters(created_file, rule_yaml_table)
-        write_return(created_file, rule_yaml_table)
+        write_priority(created_file, header, priority)
+        write_events_table(created_file, header)
+        write_input_parameter(created_file, header)
+        write_rule_function(created_file, header, modulename, priority, modulepath)
+        write_get_events_parameters(created_file, header)
+        write_return(created_file, header)
 
         created_file:close()
         local to_compile = io.open("module.lua", "rb")

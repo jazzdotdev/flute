@@ -1,33 +1,33 @@
-function get_and_decode_yaml (modulepath)
-  local action_yaml = ""
+function extract_header (modulepath)
+  local header = ""
   local line_num = 0
   for line in io.lines(modulepath .. ".lua") do
     line_num = line_num + 1
-    action_yaml = action_yaml .. line .. "\n" -- get only yaml lines
+    header = header .. line .. "\n" -- get only first 3 lines
     if line_num == 3 then break end
   end
 
-  return yaml.to_table(action_yaml) -- decode yaml to lua table
+  return scl.to_table(header) -- decode scl string into a lua table
 end
 
-function write_events (created_file, action_yaml_table)
-  created_file:write("local event = { \"" .. action_yaml_table.event[1] .. "\"") -- put values from yaml in lua form
-  for _, yaml_event in ipairs(action_yaml_table.event) do
-    if yaml_event ~= action_yaml_table.event[1] then
+function write_events (created_file, header)
+  created_file:write("local event = { \"" .. header.event[1] .. "\"") -- put values from yaml in lua form
+  for _, yaml_event in ipairs(header.event) do
+    if yaml_event ~= header.event[1] then
       created_file:write(', "' .. yaml_event .. '"') -- put all events to 'local event = { }'
     end
   end
   created_file:write(" }")
 end
 
-function set_priority (created_file, action_yaml_table)
-  created_file:write("\nlocal priority = " .. action_yaml_table.priority .. " \n\n")
+function set_priority (created_file, header)
+  created_file:write("\nlocal priority = " .. header.priority .. " \n\n")
 end
 
-function write_input_parameters (created_file, action_yaml_table)
-  if action_yaml_table.input_parameters[1] then
-    created_file:write("local input_parameters = { " .. "\"" .. action_yaml_table.input_parameters[1] .. "\"")
-    for k, v in pairs(action_yaml_table.input_parameters) do
+function write_input_parameters (created_file, header)
+  if header.input_parameters[1] then
+    created_file:write("local input_parameters = { " .. "\"" .. header.input_parameters[1] .. "\"")
+    for k, v in pairs(header.input_parameters) do
       if not table.contains(_G.every_events_actions_parameters, v) then table.insert( _G.every_events_actions_parameters, v ) end
       if k ~= 1 then
         created_file:write(", \"" .. v .. "\"")
@@ -37,9 +37,9 @@ function write_input_parameters (created_file, action_yaml_table)
   end
 end
 
-function write_function (created_file, action_yaml_table, modulepath)
+function write_function (created_file, header, modulepath)
   created_file:write("local function action(arguments)\n") -- function wrapper
-  for k, v in pairs(action_yaml_table.input_parameters) do
+  for k, v in pairs(header.input_parameters) do
     created_file:write("\n\tlocal " .. v .. " = " .. "arguments[\"" .. v .. "\"]")
   end
   line_num = 0
@@ -52,7 +52,7 @@ function write_function (created_file, action_yaml_table, modulepath)
   created_file:write("\nend")
 end
 
-function write_return (created_file, action_yaml_table)
+function write_return (created_file, header)
   created_file:write("\n\nreturn{\n\tevent = event,\n\taction = action,\n\tpriority = priority,\n\tinput_parameters = input_parameters\n}") -- ending return
 end
 
@@ -66,13 +66,13 @@ package.searchers[2] = function(name)
       local filename = string.gsub(path, "%?", modulepath)
       local file = io.open(filename, "rb")
       if file then
-        local action_yaml_table = get_and_decode_yaml(modulepath)
+        local header = extract_header(modulepath)
 
-        write_events(created_file, action_yaml_table)
-        set_priority(created_file, action_yaml_table)
-        write_input_parameters(created_file, action_yaml_table)
-        write_function(created_file, action_yaml_table, modulepath)
-        write_return(created_file, action_yaml_table)
+        write_events(created_file, header)
+        set_priority(created_file, header)
+        write_input_parameters(created_file, header)
+        write_function(created_file, header, modulepath)
+        write_return(created_file, header)
 
         created_file:close()
         -- Compile and return the module
