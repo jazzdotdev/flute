@@ -16,11 +16,11 @@ for _, package_name in ipairs(fs.directory_list(_G.packages_path)) do
     log.debug("[loading] model at " .. ansicolors('%{underline}' .. filename))
 
     -- Get the model name from the file name (remove irectories and extension)
-    local name = filename:match("(.+)%.yaml$")
+    local name = filename:match("(.+)%.scl$")
     local file_path = models_path .. filename
-    local model_yaml = fs.read_file(file_path)
-    local model_yaml_table = yaml.to_table(model_yaml)
-    models[name] = model_yaml_table
+    local model_scl = fs.read_file(file_path)
+    local model_table = scl.to_table(model_scl)
+    models[name] = model_table
   end
 
 end
