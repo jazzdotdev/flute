@@ -55,7 +55,6 @@ end
 
 function load_classes ()
   log.trace("Loading classes in theme")
-  print(inspect(fs.get_all_files_in(class_dir)))
   if fs.is_dir(class_dir) then
     each(fs.get_all_files_in(class_dir), load_class_file)
   end
