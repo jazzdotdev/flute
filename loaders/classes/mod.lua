@@ -1,7 +1,7 @@
 
 local class_dir = "temp-theme/_class/"
-require("loader.class-loader-functions.base")
-require("loader.class-loader-functions.load_class_file")
+require("loader.classes.base")
+require("loader.classes.load_class_file")
 
 function load_classes ()
   log.trace("Loading classes in theme")
