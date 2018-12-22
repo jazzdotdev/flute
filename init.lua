@@ -47,7 +47,7 @@ content.home = home_store
 
 require "loaders.package"
 
-local theme_loader = require "loaders.themes.mod"
+local theme_loader = require "loaders.theme.mod"
 local class_loader = require "loaders.classes"
 
 if torchbear.settings.theme then

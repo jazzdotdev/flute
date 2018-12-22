@@ -44,10 +44,6 @@ function load_class_file (file_name)
     )
   end
 
-  print(template)
-
-  print("<(" .. element_specifier .. "[^>])>", replace_str)
-
   local file = io.open(path, "w+")
   file:write(template)
   file:close()
