@@ -121,9 +121,10 @@ function create_actions (package_name)
           end
         )
         event:setActionPriority(action, action_require.priority)
-        if isDisabled(file_name) then
-          event:disableAction(action)
-        end
+        
+        --if isDisabled(file_name) then
+        --  event:disableAction(action)
+        --end
       else
         log.error("event " .. v .. " doesn't exist")
       end

@@ -52,7 +52,7 @@ end
 function load_classes ()
   log.trace("Loading classes in theme")
   if fs.is_dir(class_dir) then
-    each(fs.get_all_files_in(class_dir), class_loader.load_class_file)
+    each(fs.get_all_files_in(class_dir), load_class_file)
   end
 end
 
