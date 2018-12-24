@@ -59,10 +59,15 @@ theme_loader.add_preprocessor(function (themes)
   print("theme preprocessor")
 
   for name, files in pairs(themes) do
+    print("Processing theme: " .. name )
+    -- log.debug("Processing theme index: " .. i )
     for filename, _in in pairs(files) do
       print("Processing " .. filename)
       local out, count = _in:gsub("{=(.+)=}", function (msg)
-        return "[" .. name .. ":" .. msg .. "]"
+
+        print("Name of the tag: " .. "{% extends \"" .. name .. "-" .. msg .. ".html\"" .. "%}")
+        print("Name of the tag message:" .. msg)
+        return "{% extends \"" .. name .. "-base.html\"" .. "%}"  -- replace of the tag {= CONTENT =}
       end)
       print("Replaced " .. count .. " times")
       print(out)
