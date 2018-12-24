@@ -52,8 +52,11 @@ local class_loader = require "loaders.classes"
 
 
 -- Move this to another file, in loaders maybe
-local function theme_callback (themes)
-  print("theme_callback")
+
+print(inspect(theme_loader))
+
+theme_loader.add_preprocessor(function (themes)
+  print("theme preprocessor")
 
   for name, files in pairs(themes) do
     for filename, _in in pairs(files) do
@@ -66,10 +69,10 @@ local function theme_callback (themes)
       files[filename] = out
     end
   end
-end
+end)
 
 if torchbear.settings.theme then
-  theme_loader.load_themes("themes/", torchbear.settings.theme, theme_callback)
+  theme_loader.load_themes("themes/", torchbear.settings.theme)
   class_loader.load_classes()
 end
 
