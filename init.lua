@@ -56,23 +56,27 @@ local class_loader = require "loaders.classes"
 print(inspect(theme_loader))
 
 theme_loader.add_preprocessor(function (themes)
+  -- local theme_index = 0
   print("theme preprocessor")
+  -- print(themes)
 
   for name, files in pairs(themes) do
-    print("Processing theme: " .. name )
-    -- log.debug("Processing theme index: " .. i )
+    log.debug("Processing theme: " .. name )
+
     for filename, _in in pairs(files) do
-      print("Processing " .. filename)
+      log.debug("Processing " .. filename)
       local out, count = _in:gsub("{=(.+)=}", function (msg)
 
-        print("Name of the tag: " .. "{% extends \"" .. name .. "-" .. msg .. ".html\"" .. "%}")
-        print("Name of the tag message:" .. msg)
+        log.debug("Name of the tag: " .. "{% extends \"" .. name .. "-" .. msg .. ".html\"" .. "%}")
+        log.debug("Name of the tag message:" .. msg)
+        
         return "{% extends \"" .. name .. "-base.html\"" .. "%}"  -- replace of the tag {= CONTENT =}
       end)
       print("Replaced " .. count .. " times")
       print(out)
       files[filename] = out
     end
+    theme_index = theme_index + 1
   end
 end)
 
