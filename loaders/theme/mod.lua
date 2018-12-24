@@ -1,69 +1,52 @@
-fs_lua = require("fs")
 
-themes = {}
-require("loaders.theme.base")
-require("loaders.theme.get_parent_themes")
-require("loaders.theme.find_directories")
-require("loaders.theme.copy_files")
-require("loaders.theme.copy_files_no_dot_checking")
+local themes = {}
 
-local function load_themes(themes_dir, initial_name)
+local function load_themes(themes_dir, main_theme)
 
-  local themes_dir_path = themes_dir -- take themes dir from function arguments
-  local initial_theme_name = initial_name -- take initial theme name from function arguments
-  local temp_theme_path = "temp-theme" -- path for temp-theme
+  local themes = {}
 
-  os.execute("rm -r " .. temp_theme_path) -- remove old temp-theme
-  fs.create_dir(temp_theme_path) -- create new temp-theme dir
+  local function load_theme (name)
+    local path = themes_dir .. name .. "/"
 
-  local initial_theme_path = themes_dir_path .. "/" .. initial_theme_name
-  local initial_config_path = initial_theme_path .. "/" .. "info.yaml" -- open info.yaml from initial
-  table.insert( themes, initial_theme_name )
+    local files = {}
+    local function scan_subdir (subdir)
+      -- In here, I refer to dir as the subdirectory inside the theme directory
+      -- and path to the actual location of the file
 
-  for k, v in ipairs(themes) do -- copy files to temp-theme from each parent of each theme 
-    local theme_yaml = ""
-    local theme_name = v
-    local path_to_copy = themes_dir_path .. "/" .. theme_name .. "/"
-    local dest_path = temp_theme_path .. "/"
-    local paths = {}
+      local subpath = path .. subdir
 
-    themes_loader.get_parent_themes(path_to_copy .. "info.yaml", theme_name)
+      for entry in fs.entries(subpath) do
+        local entry_path = subpath .. entry
 
-    repeat
+        if fs.is_dir(entry_path) then
+          -- Recurse directories
+          scan_subdir(subdir .. entry .. "/")
 
-        themes_loader.copy_files(path_to_copy, dest_path)
-        themes_loader.find_directories(path_to_copy, paths)
-
-        -- update paths
-        if paths[1] ~= nil then
-          path_to_copy = paths[1] .. "/"
-          dest_path = temp_theme_path
-          local path_modules = path_to_copy:split("/")
-          table.remove( path_modules, 1 )
-          table.remove( path_modules, 1 )
-          -- deleting the first two modules so f.e from themes/fixed-sidebar/templates we have /templates
-          for k, v in pairs(path_modules) do
-            dest_path = dest_path .. "/" .. v
-          end
-          dest_path = dest_path .. "/" -- dest path is like temp-theme/templates
-
-          os.execute("mkdir -p " .. dest_path) -- create dir in temp-theme/
-          
-          themes_loader.find_directories(path_to_copy, paths)
-
-
-          themes_loader.copy_files_no_dot_checking(path_to_copy, dest_path)
+        elseif fs.is_file(entry_path) then
+          -- Add the file contents to the file list
+          files[subdir .. entry] = fs.read_file(entry_path)
         end
-        --
-        table.remove( paths, 1 )
 
-    until(#paths == 0) -- repeat until there were no more subdirectiories
+      end
+    end
 
-    log.debug("[loaded] themes")
+    scan_subdir("")
+
+    -- Add the file list to the global themes list
+    themes[name] = files
   end
 
-  tera.instance:extend(temp_theme_path .. "/**/*")
-  tera.instance:reload()
+  local all_files = {}
+
+  load_theme(main_theme)
+
+  for theme_name, files in pairs(themes) do
+    for filename, contents in pairs(files) do
+      all_files[filename] = contents
+    end
+  end
+
+  tera.instance:add_raw_templates(all_files)
 end
 
 return{
