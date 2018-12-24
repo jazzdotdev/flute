@@ -50,8 +50,26 @@ require "loaders.package"
 local theme_loader = require "loaders.theme.mod"
 local class_loader = require "loaders.classes"
 
+
+-- Move this to another file, in loaders maybe
+local function theme_callback (themes)
+  print("theme_callback")
+
+  for name, files in pairs(themes) do
+    for filename, _in in pairs(files) do
+      print("Processing " .. filename)
+      local out, count = _in:gsub("{=(.+)=}", function (msg)
+        return "[" .. name .. ":" .. msg .. "]"
+      end)
+      print("Replaced " .. count .. " times")
+      print(out)
+      files[filename] = out
+    end
+  end
+end
+
 if torchbear.settings.theme then
-  theme_loader.load_themes("themes/", torchbear.settings.theme)
+  theme_loader.load_themes("themes/", torchbear.settings.theme, theme_callback)
   class_loader.load_classes()
 end
 
