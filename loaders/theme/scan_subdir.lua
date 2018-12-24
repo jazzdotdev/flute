@@ -21,7 +21,7 @@ function themes_loader.scan_subdir (files, subdir, path,is_parent,parent_name)
         file_name = subdir .. entry        
       end
 
-      log.debug("Nombre del archivo: " .. file_name)
+      log.debug("Name of the File : " .. file_name)
 
       files[subdir .. entry] = fs.read_file(entry_path) -- create a parameter and when it is a parent change the name of the file in the scan sub dir
     end
