@@ -6,7 +6,7 @@ require("loaders.theme.scan_subdir")
 
 local function load_themes(themes_dir, main_theme, callback)
   themes_loader.dir = themes_dir
-  themes_loader.load_theme(main_theme)
+  themes_loader.load_theme(main_theme,false)
 
   if callback then
     callback(themes)

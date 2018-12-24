@@ -1,4 +1,4 @@
-function themes_loader.load_theme (name)
+function themes_loader.load_theme (name,is_parent)
   log.debug("[loading] theme " .. name)
 
   local path = themes_loader.dir .. name .. "/"
@@ -11,11 +11,13 @@ function themes_loader.load_theme (name)
   local info = yaml.to_table(info_content)
 
   local files = {}
-  themes_loader.scan_subdir(files, "", path)
+  themes_loader.scan_subdir(files, "", path,is_parent,name)
 
   if info.parents then
     for _, parent in ipairs(info.parents) do
-      themes_loader.load_theme(parent)
+      -- here are only the parents
+
+      themes_loader.load_theme(parent,true) -- create a parameter and when it is a parent change the name of the file in the scan sub dir
     end
   end
 
