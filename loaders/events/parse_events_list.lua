@@ -1,4 +1,4 @@
-function events_loader.parse_events_lists (package_name)
+function events_loader.parse_events_list (package_name)
     local events_strings = { } -- events names table
     local event_count = 0
     local package_path = _G.packages_path .. "/" .. package_name .. "/"
@@ -10,7 +10,8 @@ function events_loader.parse_events_lists (package_name)
 
     event_count = events_loader.count_lines(events_strings)
 
-    events_loader.create_events(event_count, events_strings)
+    -- events_loader.create_events(event_count, events_strings)
 
-    events_loader.read_disabled_actions(package_path)
+    -- events_loader.read_disabled_actions(package_path)
+    return events_strings
 end
