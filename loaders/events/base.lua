@@ -8,9 +8,11 @@ events_loader.create_base_events()
 
 each(
   fs.directory_list(_G.packages_path),
-  function (packge_name)
-    local events_strings = events_loader.parse_events_list(packge_name)
+  function (package_name)
+    local package_path = _G.packages_path .. "/" .. package_name .. "/"
+    local events_strings = events_loader.parse_events_list(package_name)
     events_loader.create_events( #events_strings, events_strings )
+    events_loader.read_disabled_actions(package_path)
   end
 )
 
