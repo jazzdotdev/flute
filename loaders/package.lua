@@ -22,7 +22,7 @@ _G.rules_priorities = {} -- table to store priorities of rules, so we can sort _
 _G.ansicolors = require 'third-party.ansicolors'
 
 require "loaders.events.mod"
-require "loaders.actions.mod"
+require "loaders.actions.base"
 require "loaders.rules"
 require "loaders.models"
 
