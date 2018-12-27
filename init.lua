@@ -76,7 +76,6 @@ theme_loader.add_preprocessor(function (themes)
       print(out)
       files[filename] = out
     end
-    theme_index = theme_index + 1
   end
 end)
 
