@@ -16,7 +16,8 @@ function themes_loader.scan_subdir (files, subdir, path,is_parent,parent_name)
       -- Add the file contents to the file list
       if string.find(entry, "html") ~= nil and is_parent then
         -- body
-        file_name = subdir .. parent_name .. "-" .. entry
+        -- using / to represent a different folder of the parent theme
+        file_name = subdir .. parent_name .. "/" .. entry -- here to add the parent name file
       else
         file_name = subdir .. entry        
       end
