@@ -1,13 +1,13 @@
-function actions_loader.assign_action_to_event(action_require, file_name)
-  for k, v in pairs(action_require.event) do
+function actions_loader.assign_action_to_event(action, file_name)
+  for k, v in pairs(action.event) do
     local event = _G.events[v]
     if event then
-      table.insert( _G.events_actions[v], action_require )
-      local action = event:addAction(
-      function(action_arguments)
-        log.debug("[running] action " .. ansicolors('%{underline}' .. file_name) .. " with priority " .. action_require.priority )
+      table.insert( _G.events_actions[v], action )
+      local event_action = event:addAction(
+      function(input_parameters)
+        log.debug("[running] action " .. ansicolors('%{underline}' .. file_name) .. " with priority " .. action.priority )
         -- TODO: figure out what to do if more than one responses are returned
-        possibleResponse = action_require.action(action_arguments)
+        possibleResponse = action.action(input_parameters)
         if possibleResponse ~= nil then
           if possibleResponse.body ~= nil then
             _G.lighttouch_response = possibleResponse
@@ -19,10 +19,9 @@ function actions_loader.assign_action_to_event(action_require, file_name)
         log.debug("[completed] action " .. ansicolors('%{underline}' .. file_name) )
       end
       )
-      event:setActionPriority(action, action_require.priority)
-      
+      event:setActionPriority(event_action, action.priority)
       if events_loader.isDisabled(file_name) then
-        event:disableAction(action)
+        event:disableAction(event_action)
       end
     else
       log.error("event " .. v .. " doesn't exist")
