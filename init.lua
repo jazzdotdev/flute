@@ -12,6 +12,10 @@ math.randomseed(os.time())
 
 tera.instance = tera.new(torchbear.settings.templates_path or "templates/**/*")
 
+function _G.render (file, data)
+  return tera.instance:render(file, data)
+end
+
 _G.log = require "third-party.log"
 _G.inspect = require "third-party.inspect"
 _G.luvent = require "third-party.Luvent"
@@ -47,37 +51,12 @@ content.home = home_store
 
 require "loaders.package"
 
-local theme_loader = require "loaders.theme.mod"
+local theme_loader = require "loaders.themes.base"
 local class_loader = require "loaders.classes"
 
 
--- Move this to another file, in loaders maybe
-
-print(inspect(theme_loader))
-
-theme_loader.add_preprocessor(function (themes)
-  print("theme preprocessor")
-
-  for name, files in pairs(themes) do
-    for filename, _in in pairs(files) do
-      print("Processing " .. filename)
-      local out, count = _in:gsub("{=(.+)=}", function (msg)
-        return "[" .. name .. ":" .. msg .. "]"
-      end)
-      print("Replaced " .. count .. " times")
-      print(out)
-      files[filename] = out
-    end
-  end
-end)
-
 if torchbear.settings.theme then
   theme_loader.load_themes("themes/", torchbear.settings.theme)
-  class_loader.load_classes()
-end
-
-function _G.render (file, data)
-  return tera.instance:render(file, data)
 end
 
 local incoming_request_event = events["incoming_request_received"]

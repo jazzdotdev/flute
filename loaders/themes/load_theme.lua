@@ -20,5 +20,10 @@ function themes_loader.load_theme (name)
   end
 
   -- Add the file list to the global themes list
-  themes[name] = files
+  themes[name] = {
+    name = name,
+    info = info,
+    files = files,
+    dir = name .. "/",
+  }
 end
