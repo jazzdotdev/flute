@@ -51,7 +51,7 @@ content.home = home_store
 
 require "loaders.package"
 
-local theme_loader = require "loaders.theme.mod"
+local theme_loader = require "loaders.themes.base"
 local class_loader = require "loaders.classes"
 
 
