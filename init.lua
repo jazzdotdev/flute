@@ -12,6 +12,10 @@ math.randomseed(os.time())
 
 tera.instance = tera.new(torchbear.settings.templates_path or "templates/**/*")
 
+function _G.render (file, data)
+  return tera.instance:render(file, data)
+end
+
 _G.log = require "third-party.log"
 _G.inspect = require "third-party.inspect"
 _G.luvent = require "third-party.Luvent"
@@ -56,10 +60,6 @@ local class_loader = require "loaders.classes"
 if torchbear.settings.theme then
   theme_loader.load_themes("themes/", torchbear.settings.theme)
   class_loader.load_classes()
-end
-
-function _G.render (file, data)
-  return tera.instance:render(file, data)
 end
 
 local incoming_request_event = events["incoming_request_received"]
