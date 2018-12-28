@@ -1,61 +1,53 @@
 
-local class_dir = "temp-theme/_class/"
+local function load_classes (themes)
+  for _, theme in pairs(themes) do
+    log.trace("Loading classes in theme " .. theme.name)
 
-function load_class_file (file_name)
-  log.trace("Loading class file " .. file_name)
-  local template_file, element_specifier = file_name:match("^(.+%.%w+)%-(.+)%.txt")
+    for class_filename, classes in pairs(theme.files) do
+      --local pattern = "^(.+/)_class/(.+%.%w+)%-(.+)%.txt$"
+      --local dir, basename, elem = class_filename:match(pattern)
 
-  if not template_file then
-    log.error(file_name .. " is not a valid class filename")
-    return
-  end
+      local pattern = [[^((?:.+/)?)_class/(.+\.\w+)\-(.+)\.txt$]]
+      local matches = regex.captures(pattern, class_filename)
 
+      -- If current file is a class file
+      if matches then
+        log.trace("Processing class file " .. class_filename)
 
-  local class_path = class_dir .. file_name
-  local classes = fs.read_file(class_path)
-  if not classes then
-    log.error("Couldn't read " .. class_path)
-    return
-  end
+        local dir, basename, elem = matches[2], matches[3], matches[4]
 
-  local path = "temp-theme/" .. template_file
-  local template = fs.read_file(path)
-  if not template then
-    log.error("Couldn't read " .. path)
-    return
-  end
+        local filename = basename
+        if dir ~= "" then
+          filename = dir .. basename
+        end
 
+        local content = theme.files[filename]
 
-  if element_specifier:sub(1,1) == "#" then
-    -- element id
-    local id = element_specifier:sub(2, -1)
+        -- Execute the sustitution
+        if content then
 
-    template = string.gsub(template,
-      "<([^>]*%sid=\"" .. id .. "\"[^>]*)>",
-      "<%1 class=\"\n" .. classes .. "\">"
-    )
-  else
-    -- Tag name case
+          -- Either an id or just a tag name
+          if elem:sub(1,1) == "#" then
+            local id = elem:sub(2, -1)
+            content = string.gsub(content,
+              "<([^>]*%sid=\"" .. id .. "\"[^>]*)>",
+              "<%1 class=\"\n" .. classes .. "\">"
+            )
+          else
+            -- This *maaay* break if a tag name contains another tag name at the beggining
+            content = string.gsub(content,
+              "<(" .. elem .. "[^>]*)>",
+              "<%1 class=\"\n" .. classes .. "\">"
+            )
+          end
 
-    -- This *maaay* break if a tag name contains another tag name at the beggining
-    template = string.gsub(template,
-      "<(" .. element_specifier .. "[^>]*)>",
-      "<%1 class=\"\n" .. classes .. "\">"
-    )
-  end
-
-  local file = io.open(path, "w+")
-  file:write(template)
-  file:close()
-end
-
-function load_classes ()
-  log.trace("Loading classes in theme")
-  if fs.is_dir(class_dir) then
-    each(fs.get_all_files_in(class_dir), load_class_file)
+          theme.files[filename] = content
+        else
+          log.error("File " .. filename .. " not found")
+        end
+      end
+    end
   end
 end
 
-return {
-  load_classes = load_classes
-}
+themes_loader.add_preprocessor(load_classes)
