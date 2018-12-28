@@ -7,15 +7,7 @@ function actions_loader.assign_action_to_event(action, file_name)
       function(input_parameters)
         log.debug("[running] action " .. ansicolors('%{underline}' .. file_name) .. " with priority " .. action.priority )
         -- TODO: figure out what to do if more than one responses are returned
-        possibleResponse = action.action(input_parameters)
-        if possibleResponse ~= nil then
-          if possibleResponse.body ~= nil then
-            _G.lighttouch_response = possibleResponse
-            if events["outgoing_response_about_to_be_sent"] then
-              events["outgoing_response_about_to_be_sent"]:trigger({response = possibleResponse})
-            end
-          end
-        end
+        _G.lighttouch_response = action.action(input_parameters)
         log.debug("[completed] action " .. ansicolors('%{underline}' .. file_name) )
       end
       )
