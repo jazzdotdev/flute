@@ -55,8 +55,6 @@ local theme_loader = require "loaders.themes.base"
 local class_loader = require "loaders.classes"
 
 
--- Move this to another file, in loaders maybe
-
 if torchbear.settings.theme then
   theme_loader.load_themes("themes/", torchbear.settings.theme)
 end
