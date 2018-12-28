@@ -1,10 +1,13 @@
 -- Lighttouch · Torchbear App
 
+-- this config must be before requires
 local address = torchbear.settings.address or "localhost"
 local host = torchbear.settings.host or "3000"
 _log.info("starting web server on " .. address .. ":" .. host)
-
 package.path = package.path..";lighttouch-base/?.lua;"
+--
+
+require "mod"
 
 _log.debug("[loading] libraries")
 
@@ -16,24 +19,11 @@ function _G.render (file, data)
   return tera.instance:render(file, data)
 end
 
-_G.log = require "third-party.log"
-_G.inspect = require "third-party.inspect"
-_G.luvent = require "third-party.Luvent"
-
-require "third-party.base64"
-_G.fs = require "fs"
-
 log.level = torchbear.settings.log_level or "info"
 
 fs.create_dir("log")
 log.outfile = "log/lighttouch"
 
-require "table_ext"
-require "string_ext"
-require "underscore_alias"
-
-_G.content = require "content.mod"
-_G.keys = require "keys.mod"
 
 -- Get home-store uuid
 local home_store = fs.read_file("home-store.txt")
@@ -49,10 +39,6 @@ if not home_store then
 end
 content.home = home_store
 
-require "loaders.package"
-
-local theme_loader = require "loaders.themes.base"
-local class_loader = require "loaders.classes"
 
 
 if torchbear.settings.theme then
