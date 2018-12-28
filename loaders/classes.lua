@@ -1,4 +1,3 @@
-
 local function load_classes (themes)
   for _, theme in pairs(themes) do
     log.trace("Loading classes in theme " .. theme.name)
