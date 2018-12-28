@@ -7,6 +7,8 @@ require("loaders.theme.load_theme")
 require("loaders.theme.scan_subdir")
 require("loaders.theme.add_preprocessor")
 
+require("loaders.theme.extends_rewriter")
+
 function themes_loader.load_themes (themes_dir, main_theme, callback)
   themes_loader.dir = themes_dir
   themes_loader.load_theme(main_theme)
@@ -16,9 +18,9 @@ function themes_loader.load_themes (themes_dir, main_theme, callback)
   end
 
   local all_files = {}
-  for theme_name, files in pairs(themes) do
-    for filename, contents in pairs(files) do
-      all_files[filename] = contents
+  for name, theme in pairs(themes) do
+    for filename, contents in pairs(theme.files) do
+      all_files[theme.dir .. filename] = contents
     end
   end
 
