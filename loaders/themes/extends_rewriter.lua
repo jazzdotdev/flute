@@ -4,7 +4,7 @@ local function extends_rewriter (themes)
   for name, theme in pairs(themes) do
     for filename, _in in pairs(theme.files) do
 
-      local pattern = "{%%%s+extends%s+['\"](.+)['\"]%s+%%}"
+      local pattern = "{%%%s+extends%s+['\"](.-)['\"]%s+%%}"
       local out, count = _in:gsub(pattern, function (path)
 
         local new_path = themes_loader.resolve_template(theme, path)
@@ -26,8 +26,9 @@ local function include_rewriter (themes)
   for name, theme in pairs(themes) do
     for filename, _in in pairs(theme.files) do
 
-      local pattern = "{%%%s+include%s+['\"](.+)['\"]%s+%%}"
+      local pattern = "{%%%s+include%s+['\"](.-)['\"]%s+%%}"
       local out, count = _in:gsub(pattern, function (path)
+      
         local new_path = themes_loader.resolve_template(theme, path)
         return '{% include "' .. new_path .. '" %}'
 
