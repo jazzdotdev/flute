@@ -6,7 +6,7 @@ local function load_classes (themes)
       --local pattern = "^(.+/)_class/(.+%.%w+)%-(.+)%.txt$"
       --local dir, basename, elem = class_filename:match(pattern)
 
-      local pattern = [[^((?:.+/)?)_class/(.+\.\w+)\-(.+)\.txt$]]
+      local pattern = [[^((?:.+/)?)_class/(.+\.\w+)/(.+)\.txt$]]
       local matches = regex.captures(pattern, class_filename)
 
       -- If current file is a class file
