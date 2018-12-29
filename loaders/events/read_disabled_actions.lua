@@ -1,5 +1,5 @@
+local disabled_actions = { }
 function events_loader.read_disabled_actions (package_path)
-  local disabled_actions = { }
   for line in fs.read_lines(package_path .. "disabled_actions.txt") do
     table.insert( disabled_actions, line )
   end
