@@ -1,0 +1,13 @@
+function rules_loader.write_get_events_parameters (created_file, header)
+  created_file:write("\nlocal function get_events_parameters(events_actions)")
+    created_file:write("\n\tfor k, v in pairs(events_table) do")
+      created_file:write("\n\t\tfor k1, v1 in pairs(events_actions[v]) do")
+        created_file:write("\n\t\t\tfor k2, v2 in pairs(v1.input_parameters) do")
+          created_file:write("\n\t\t\t\tif not events_parameters[v2] then")
+            created_file:write("\n\t\t\t\t\tevents_parameters[v2] = \" \"")
+          created_file:write("\n\t\t\t\tend")
+        created_file:write("\n\t\t\tend")
+      created_file:write("\n\t\tend")
+    created_file:write("\n\tend")
+  created_file:write("\nend")
+end

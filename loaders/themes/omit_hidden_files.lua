@@ -4,10 +4,10 @@ local function omit_hidden_files (themes)
   for _, theme in pairs(themes) do
     for filename, _ in pairs(theme.files) do
 
-      if filename:match("^%.") then
+      if filename:match("^%.") or filename:match("/%.") then
         theme.files[filename] = nil
       end
-      
+
     end
   end
 end
