@@ -15,7 +15,7 @@ luvent = {
 
 ansicolors = {  
 	url = "https://github.com/kikito/ansicolors.lua",
-	pick = "ansicolors.lua"
+	pluck = "ansicolors.lua"
 }
 
 underscore = {  
@@ -25,20 +25,20 @@ underscore = {
 
 inspect = {  
 	url = "https://github.com/kikito/inspect.lua",
-	pick = "inspect.lua"
+	pluck = "inspect.lua"
 }
 
 valua = {  
 	url = "https://github.com/sailorproject/valua",
-	pick = "valua.lua"
+	pluck = "valua.lua"
 }
 
 base64 = {  
 	url = "https://github.com/foundpatterns/lua-base64",
-	pick = "base64.lua"
+	pluck = "base64.lua"
 }
 
 log = {  
 	url = "https://github.com/foundpatterns/log.lua",
-	pick = "log.lua"
+	pluck = "log.lua"
 }
