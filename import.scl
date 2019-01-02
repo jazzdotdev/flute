@@ -1,44 +1,25 @@
 imports = {
   luvent = "third-party/",
-  ansicolors = "third-party/",
-  underscore = "third-party/",
-  inspect = "third-party/",
   valua = "third-party/",
-  base64 = "third-party/",
-  log = "third-party/",
+  torchbear-libs = "third-party/", 
+  # torchbear-libs-dev = "third-party/",
+}
+
+torchbear-libs = {
+    url = "https://github.com/foundpatterns/torchbear-libs",
+    repo = true,
+}
+
+torchbear-libs-dev = {
+    url = "https://github.com/foundpatterns/torchbear-libs-dev",
+    repo = true,
 }
   
 luvent = {  
 	url = "https://github.com/ejmr/Luvent",
 	export = "src"
 }
-
-ansicolors = {  
-	url = "https://github.com/kikito/ansicolors.lua",
-	pluck = "ansicolors.lua"
-}
-
-underscore = {  
-	url = "https://github.com/mirven/underscore.lua",
-	export = "lib"
-}
-
-inspect = {  
-	url = "https://github.com/kikito/inspect.lua",
-	pluck = "inspect.lua"
-}
-
 valua = {  
 	url = "https://github.com/sailorproject/valua",
-	pluck = "valua.lua"
-}
-
-base64 = {  
-	url = "https://github.com/foundpatterns/lua-base64",
-	pluck = "base64.lua"
-}
-
-log = {  
-	url = "https://github.com/foundpatterns/log.lua",
-	pluck = "log.lua"
+	pluck = "valua.lua",
 }
