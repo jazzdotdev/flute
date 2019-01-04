@@ -1,4 +1,8 @@
+<<<<<<< HEAD
 function classes_loader.process_content(theme, filename, elem, classes)
+=======
+function classes_loader.process_content(theme, filename)
+>>>>>>> 810b3c992a10cd1fabd90152238beace02937a30
   local content = theme.files[filename]
 
   -- Execute the sustitution
