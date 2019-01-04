@@ -7,7 +7,9 @@ function actions_loader.assign_action_to_event(action, file_name)
       function(input_parameters)
         log.debug("[running] action " .. ansicolors('%{underline}' .. file_name) .. " with priority " .. action.priority )
         -- TODO: figure out what to do if more than one responses are returned
-        _G.lighttouch_response = action.action(input_parameters)
+        if _G.lighttouch_response == nil then
+          _G.lighttouch_response = action.action(input_parameters)
+        end
         log.debug("[completed] action " .. ansicolors('%{underline}' .. file_name) )
       end
       )
