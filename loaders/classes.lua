@@ -8,13 +8,13 @@ local function load_classes (themes)
       
       local pattern = [[^((?:.+/)?)_class/(.+\.\w+)/(.+)\.txt$]]
       local regex_object = regex.new(pattern) 
-      local matches = regex_object:capture(class_filename):to_table()
+      local matches = regex_object:capture(class_filename)
 
       -- If current file is a class file
       if matches then
         log.trace("Processing class file " .. class_filename)
 
-        local dir, basename, elem = matches[2], matches[3], matches[4]
+        local dir, basename, elem = matches:get(1), matches:get(2), matches:get(3)
 
         local filename = basename
         if dir ~= "" then
