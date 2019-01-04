@@ -8,7 +8,7 @@ local function load_classes (themes)
       
       local pattern = [[^((?:.+/)?)_class/(.+\.\w+)/(.+)\.txt$]]
       local regex_object = regex.new(pattern) 
-      local matches = regex_object:capture(class_filename)
+      local matches = regex_object:capture(class_filename):to_table()
 
       -- If current file is a class file
       if matches then
