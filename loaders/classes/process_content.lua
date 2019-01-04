@@ -1,4 +1,4 @@
-function classes_loader.process_content(theme, filename)
+function classes_loader.process_content(theme, filename, elem, classes)
   local content = theme.files[filename]
 
   -- Execute the sustitution

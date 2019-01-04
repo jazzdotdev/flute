@@ -9,7 +9,7 @@ function classes_loader.process_files(theme)
 
       local dir, basename, elem = matches:get(1), matches:get(2), matches:get(3)
       local filename = classes_loader.get_filename(dir, basename)
-      classes_loader.process_content(theme, filename)
+      classes_loader.process_content(theme, filename, elem, classes)
 
     end
   end
