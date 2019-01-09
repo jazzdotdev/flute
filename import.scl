@@ -1,7 +1,8 @@
 imports = {
   luvent = "third-party/",
   valua = "third-party/",
-  torchbear-libs = "third-party/", 
+  torchbear-libs = "third-party/",
+  contentdb-lua = "content",
   # torchbear-libs-dev = "third-party/",
 }
 
@@ -22,4 +23,8 @@ luvent = {
 valua = {  
 	url = "https://github.com/sailorproject/valua",
 	pluck = "valua.lua",
+}
+
+contentdb-lua = {
+	url = "https://github.com/foundpatterns/contentdb.lua",
 }
