@@ -21,7 +21,7 @@ if not home_store then
   file:write(home_store)
   file:close()
 end
-content.home = home_store
+contentdb.home = home_store
 
 if torchbear.settings.theme then
   theme_loader.load_themes("themes/", torchbear.settings.theme)
