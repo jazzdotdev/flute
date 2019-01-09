@@ -1,11 +1,11 @@
-function content.write_file (store_id, file_uuid, fields, body_param)
+function contentdb.write_file (store_id, file_uuid, fields, body_param)
   log.trace("Running: " .. debug.getinfo(1, 'S').source)
 
-  local dir = content.stores[store_id]
+  local dir = contentdb.stores[store_id]
   if not dir then
-    dir = "content/" .. store_id .. "/"
+    dir = "contentdb/" .. store_id .. "/"
     fs.create_dir(dir, true)
-    content.stores[store_id] = dir
+    contentdb.stores[store_id] = dir
   end
   local path = dir .. file_uuid
 

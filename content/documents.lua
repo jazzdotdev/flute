@@ -1,6 +1,6 @@
-function content.documents (store_id)
+function contentdb.documents (store_id)
   if store_id then
-    local dir = content.stores[store_id]
+    local dir = contentdb.stores[store_id]
   
     local f = fs.entries(dir)
   
@@ -13,7 +13,7 @@ function content.documents (store_id)
   else
   
     local docs_co = coroutine.create(function ()
-    for store_id, dir in pairs(content.stores) do
+    for store_id, dir in pairs(contentdb.stores) do
       if fs.exists(dir) then
       for entry in fs.entries(dir) do
         coroutine.yield(entry, store_id)

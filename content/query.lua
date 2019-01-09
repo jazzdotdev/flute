@@ -1,14 +1,14 @@
-function content.query (query_str)
+function contentdb.query (query_str)
   log.trace("Start tantivy search")
 
   local fields = {}
-  for _, v in pairs(content.fields) do
+  for _, v in pairs(contentdb.fields) do
   table.insert(fields, v)
   end
 
-  local parser = tan.query_parser_for_index(content.index, fields)
+  local parser = tan.query_parser_for_index(contentdb.index, fields)
   local coll = tan.top_collector_with_limit(500)
-  local result = content.index:search(parser, query_str, coll)
+  local result = contentdb.index:search(parser, query_str, coll)
 
   return result
   --[[

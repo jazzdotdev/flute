@@ -1,4 +1,4 @@
-function content.get_validator (name)
+function contentdb.get_validator (name)
   local model_def = models[name]
   if not model_def then
     return nil, "Model " .. name .. " not found"
