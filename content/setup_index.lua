@@ -17,17 +17,17 @@ function contentdb.setup_index (path)
       -- Would use contentdb.read_document but it doesn't return the file contentdbs
       local path = contentdb.stores[store_id] .. doc_id
 
-      local file_contentdb = fs.read_file(path)
-      if not file_contentdb then
+      local file_content = fs.read_file(path)
+      if not file_content then
         error("could not open " .. path)
       end
 
-      local doc_fields = contentdb.split_header(file_contentdb)
+      local doc_fields = contentdb.split_header(file_content)
 
       contentdb.add_document_to_index(
         doc_id,
         store_id,
-        file_contentdb,
+        file_content,
         doc_fields.model
       )
       end
