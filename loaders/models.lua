@@ -3,6 +3,8 @@ _G.models = {}
 -- Walk through all packages' directories
 for _, package_name in ipairs(fs.directory_list(_G.packages_path)) do
 
+  local start_time = os.clock()
+
   local models_path = _G.packages_path .. "/".. package_name .. "/models/"
   local model_files = {}
 
@@ -23,6 +25,8 @@ for _, package_name in ipairs(fs.directory_list(_G.packages_path)) do
     models[name] = model_table
   end
 
+  local elapsed = (os.clock() - start_time) * 1000
+  log.trace("Loaded models for " .. package_name .. " in " .. elapsed .. " milliseconds")
 end
 
 return models
