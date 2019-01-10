@@ -1,4 +1,4 @@
-_log.debug("[loading] libraries")
+log.debug("[loading] libraries")
 
 math.randomseed(os.time())
 
