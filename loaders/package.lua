@@ -1,5 +1,3 @@
-log.trace("[loading] Lighttouch packages")
-
 -- Foreach package in packages path, get a list of every component from 
 -- events.txt, disabled_actions.txt, rules/, and actions/
 -- then run each loader
@@ -24,7 +22,7 @@ _G.rules_priorities = {} -- table to store priorities of rules, so we can sort _
 _G.ansicolors = require 'third-party.ansicolors'
 
 require "loaders.events"
-require "loaders.actions.base"
+require "loaders.actions"
 require "loaders.rules"
 require "loaders.models"
 
