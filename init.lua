@@ -9,7 +9,7 @@ package.path = package.path..";lighttouch-base/?.lua;"
 require "mod"
 require "base"
 
-log.info("starting web server on " .. address .. ":" .. port)
+log.info("[starting] web server on " .. address .. ":" .. port)
 
 -- Handler function
 return function (request)

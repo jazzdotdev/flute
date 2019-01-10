@@ -1,5 +1,5 @@
 local function omit_hidden_files (themes)
-  log.trace("Removing hidden theme files")
+  log.trace("[removing] hidden theme files")
 
   for _, theme in pairs(themes) do
     for filename, _ in pairs(theme.files) do

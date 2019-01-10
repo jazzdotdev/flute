@@ -1,5 +1,5 @@
 function themes_loader.load_theme (name)
-  log.debug("[loading] theme " .. name)
+  log.trace("[loading] theme " .. name)
 
   local path = themes_loader.dir .. name .. "/"
 

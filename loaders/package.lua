@@ -1,3 +1,5 @@
+log.trace("[loading] Lighttouch packages")
+
 -- Foreach package in packages path, get a list of every component from 
 -- events.txt, disabled_actions.txt, rules/, and actions/
 -- then run each loader

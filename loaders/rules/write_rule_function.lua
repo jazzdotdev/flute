@@ -8,7 +8,7 @@ function rules_loader.write_rule_function (created_file, header, modulename, pri
     end
     created_file:write(")")
 
-    created_file:write("\n\tlog.debug('[evaluating] " .. _G.ansicolors('%{underline}' .. modulename) .. " with priority " .. priority .. " starting to evaluate')")
+    created_file:write("\n\tlog.trace('[evaluating] " .. _G.ansicolors('%{underline}' .. modulename) .. " with priority " .. priority .. " starting to evaluate')")
 
     created_file:write("\n\tlocal arguments_strings_dictionary = { }")
     created_file:write("\n\targuments_strings_dictionary[\"" .. header.input_parameter .. "\"] = " .. header.input_parameter)
