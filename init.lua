@@ -2,8 +2,8 @@
 
 -- this config must be before requires
 local address = torchbear.settings.address or "localhost"
-local host = torchbear.settings.host or "3000"
-_log.info("starting web server on " .. address .. ":" .. host)
+local port = torchbear.settings.port or "3000"
+_log.info("starting web server on " .. address .. ":" .. port)
 package.path = package.path..";lighttouch-base/?.lua;"
 --
 
