@@ -1,25 +1,25 @@
-function classes_loader.process_content(theme, filename, elem, classes)
-  local content = theme.files[filename]
+function styles_loader.process_template(theme, filename, elem, styles)
+  local template = theme.files[filename]
 
   -- Execute the sustitution
-  if content then
+  if template then
 
     -- Either an id or just a tag name
     if elem:sub(1,1) == "#" then
       local id = elem:sub(2, -1)
-      content = string.gsub(content,
+      template = string.gsub(template,
         "<([^>]*%sid=\"" .. id .. "\"[^>]*)>",
-        "<%1 class=\"\n" .. classes .. "\">"
+        "<%1 class=\"\n" .. styles .. "\">"
       )
     else
       -- This *maaay* break if a tag name contains another tag name at the beggining
-      content = string.gsub(content,
+      template = string.gsub(template,
         "<(" .. elem .. "[^>]*)>",
-        "<%1 class=\"\n" .. classes .. "\">"
+        "<%1 class=\"\n" .. styles .. "\">"
       )
     end
 
-    theme.files[filename] = content
+    theme.files[filename] = template
   else
     log.error("File " .. filename .. " not found")
   end
