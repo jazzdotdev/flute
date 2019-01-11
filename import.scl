@@ -7,24 +7,24 @@ imports = {
 }
 
 torchbear-libs = {
-    url = "https://github.com/foundpatterns/torchbear-libs",
-    repo = true,
+  url = "https://github.com/foundpatterns/torchbear-libs",
+  repo = true,
 }
 
 torchbear-libs-dev = {
-    url = "https://github.com/foundpatterns/torchbear-libs-dev",
-    repo = true,
+  url = "https://github.com/foundpatterns/torchbear-libs-dev",
+  repo = true,
 }
   
 luvent = {  
-	url = "https://github.com/ejmr/Luvent",
-	export = "src"
+  url = "https://github.com/ejmr/Luvent",
+  export = "src"
 }
 valua = {  
-	url = "https://github.com/sailorproject/valua",
-	pluck = "valua.lua",
+  url = "https://github.com/sailorproject/valua",
+  pluck = "valua.lua",
 }
 
 contentdb-lua = {
-	url = "https://github.com/foundpatterns/contentdb.lua",
+  url = "https://github.com/foundpatterns/contentdb.lua",
 }
