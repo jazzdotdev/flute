@@ -3,3 +3,5 @@ function rules_loader.write_priority (created_file, header, modulename, priority
 
   created_file:write("local priority = " .. priority)
 end
+
+rules_loader.add_preprocessor(rules_loader.write_priority)

@@ -7,3 +7,5 @@ function rules_loader.write_events_table (created_file, header, modulename, prio
   end
   created_file:write("}")
 end
+
+rules_loader.add_preprocessor(rules_loader.write_events_table)

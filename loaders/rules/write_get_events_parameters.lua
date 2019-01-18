@@ -11,3 +11,5 @@ function rules_loader.write_get_events_parameters (created_file, header, modulen
     created_file:write("\n\tend")
   created_file:write("\nend")
 end
+
+rules_loader.add_preprocessor(rules_loader.write_get_events_parameters)
