@@ -1,3 +1,3 @@
-function rules_loader.write_input_parameter (created_file, header)
+function rules_loader.write_input_parameter (created_file, header, modulename, priority, modulepath)
   created_file:write("\nlocal input_parameter = \"" .. header.input_parameter .. "\"")
 end
