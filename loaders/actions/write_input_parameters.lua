@@ -10,3 +10,5 @@ function actions_loader.write_input_parameters (created_file, header, modulepath
       created_file:write("}\n")
     end
 end
+
+actions_loader.add_preprocessor(actions_loader.write_input_parameters)

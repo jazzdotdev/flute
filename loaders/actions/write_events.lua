@@ -7,3 +7,5 @@ function actions_loader.write_events (created_file, header, modulepath)
     end
     created_file:write(" }")
 end
+
+actions_loader.add_preprocessor(actions_loader.write_events)
