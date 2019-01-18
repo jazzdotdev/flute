@@ -13,7 +13,7 @@ for _, package_name in ipairs(fs.directory_list(_G.packages_path)) do
 
   -- Walk through files in the models directory
   for _, filename in ipairs(model_files) do
-    log.debug("[loading] model at " .. ansicolors('%{underline}' .. filename))
+    log.trace("[loading] model at " .. ansicolors('%{underline}' .. filename))
 
     -- Get the model name from the file name (remove irectories and extension)
     local name = filename:match("(.+)%.scl$")
