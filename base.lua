@@ -1,4 +1,4 @@
-_log.debug("[loading] libraries")
+log.trace("[loading] libraries")
 
 math.randomseed(os.time())
 
@@ -51,5 +51,4 @@ outgoing_response_event:addAction(response_process_action)
 outgoing_response_event:setActionPriority(response_process_action, 100)
 
 log.info("[loaded] LightTouch")
-
 events["lighttouch_loaded"]:trigger()

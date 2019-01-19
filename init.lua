@@ -2,36 +2,14 @@
 
 -- this config must be before requires
 local address = torchbear.settings.address or "localhost"
-local host = torchbear.settings.host or "3000"
-_log.info("starting web server on " .. address .. ":" .. host)
+local port = torchbear.settings.port or "3000"
 package.path = package.path..";lighttouch-base/?.lua;"
 --
 
 require "mod"
 require "base"
 
-function _G.render (file, data)
-  return tera.instance:render(file, data)
-end
-
-
-function _G.send_request (request)
-
-  if type(request) == "string" then
-    request = {uri = request}
-  end
-
-  request.uuid = uuid.v4()
-  events["outgoing_request_about_to_be_sent"]:trigger({ request = request })
-
-  local response = client_request.send(request)
-  response.uuid = uuid.v4()
-  events["incoming_response_received"]:trigger({ response = response })
-
-  return response
-end
-
-
+log.info("[starting] web server on " .. address .. ":" .. port)
 
 -- Handler function
 return function (request)

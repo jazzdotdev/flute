@@ -12,4 +12,3 @@ function actions_loader.write_function (created_file, header, modulepath)
     end
     created_file:write("\nend")
 end
-  

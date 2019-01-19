@@ -1,5 +1,5 @@
 local function extends_rewriter (themes)
-  log.trace("Rewriting extends")
+  log.trace("[rewriting] extends for theme X")
 
   for name, theme in pairs(themes) do
     for filename, _in in pairs(theme.files) do
@@ -13,7 +13,7 @@ local function extends_rewriter (themes)
       end)
 
       if count > 0 then
-        log.trace("Processed " .. count .. " extend tags in " .. theme.dir .. filename)
+        log.trace("[processed] " .. count .. " extend tags in " .. theme.dir .. filename)
         theme.files[filename] = out
       end
     end
@@ -21,7 +21,7 @@ local function extends_rewriter (themes)
 end
 
 local function include_rewriter (themes)
-  log.trace("Rewriting include")
+  log.trace("[rewriting] include")
 
   for name, theme in pairs(themes) do
     for filename, _in in pairs(theme.files) do
@@ -35,7 +35,7 @@ local function include_rewriter (themes)
       end)
       
       if count > 0 then
-        log.trace("Processed " .. count .. " include tags in " .. theme.dir .. filename)
+        log.trace("[processed] " .. count .. " include tags in " .. theme.dir .. filename)
         theme.files[filename] = out
       end
 
