@@ -5,3 +5,4 @@ require "keys.verify_http_signature"
 require "keys.sign_http_message"
 require "keys.witness_document"
 
+return keys

@@ -20,6 +20,7 @@ if not home_store then
   end
   file:write(home_store)
   file:close()
+  fs.create_dir("content/" .. home_store, true)
 end
 content.home = home_store
 
