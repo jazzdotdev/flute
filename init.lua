@@ -22,5 +22,11 @@ return function (request)
     v.rule(request)
   end
 
+  if lighttouch_response then
+    events["outgoing_response_about_to_be_sent"]:trigger({
+      response = lighttouch_response
+    })
+  end
+
   return lighttouch_response
 end
