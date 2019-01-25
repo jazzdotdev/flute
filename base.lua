@@ -1,6 +1,6 @@
 log.trace("[loading] libraries")
 
-math.randomseed(os.time())
+lua_math.randomseed(os.time())
 
 tera.instance = tera.new(torchbear.settings.templates_path or "templates/**/*")
 
