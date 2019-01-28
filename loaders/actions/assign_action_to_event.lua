@@ -6,9 +6,10 @@ function actions_loader.assign_action_to_event(action, file_name)
       local event_action = event:addAction(
       function(input_parameters)
         log.trace("[running] action " .. ansicolors('%{underline}' .. file_name) .. " with priority " .. action.priority )
-        -- TODO: figure out what to do if more than one responses are returned
-        if _G.lighttouch_response == nil then
-          _G.lighttouch_response = action.action(input_parameters)
+        local response = action.action(input_parameters)
+        -- Only the first generated response is sent
+        if response and _G.lighttouch_response == nil then
+          _G.lighttouch_response = response
         end
         log.trace("[completed] action " .. ansicolors('%{underline}' .. file_name) )
       end

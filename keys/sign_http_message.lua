@@ -1,5 +1,5 @@
 function keys.sign_http_message (message)
-  local profile_uuid = get_profile()
+  local profile_uuid = keys.get_profile()
 
   if not profile_uuid then
   return false, "No home profile found"

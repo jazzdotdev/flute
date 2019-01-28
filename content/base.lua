@@ -1,6 +1,5 @@
 content = {
   stores = {
-    home = "content/home/"
   }
 }
 
@@ -23,6 +22,3 @@ for entry in fs.entries("content/") do
     content.stores[entry] = "content/" .. entry .. "/"
   end
 end
-
-
-  fs.create_dir("content/home", true)

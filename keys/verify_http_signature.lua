@@ -7,13 +7,17 @@ function keys.verify_http_signature (message)
   -- order, not specifically keyId before signature
 
   local header = message.headers["signature"]
-  log.trace("signature header", header)
+  if not header then
+    log.info("No signature header")
+    return false
+  end
+  log.trace("signature header " .. header)
 
   if not header then log.info("Unsigned Request") return end
 
   local keyId, signature = header:match('keyId="([^"]+)".+signature="([^"]+)"')
-  log.debug("keyId", keyId)
-  log.debug("signature", signature)
+  log.debug("keyId " .. keyId)
+  log.debug("signature" .. signature)
 
   local pub_key = content.walk_documents(keyId,
     function (file_uuid, header, body)
@@ -30,10 +34,10 @@ function keys.verify_http_signature (message)
 
   pub_key = crypto.sign.load_public(pub_key)
 
-  log.trace("public key", pub_key)
+  log.trace("public key " .. tostring(pub_key))
 
   local signature_string = "date: " .. message.headers.date .. "\n" .. message.body_raw
-  log.trace("signature string", signature_string)
+  log.trace("signature string " .. signature_string)
 
   local is_valid = pub_key:verify_detached(signature_string, signature)
 
