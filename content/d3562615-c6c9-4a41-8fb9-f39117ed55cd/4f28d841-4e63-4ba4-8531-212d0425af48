@@ -1,0 +1,5 @@
+---
+host = "http://foundpatterns.com:3000/"
+model = "place"
+profile = "d3562615-c6c9-4a41-8fb9-f39117ed55cd"
+...

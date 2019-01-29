@@ -1,3 +1,4 @@
+#!/usr/bin/env torchbear
 -- Lighttouch · Torchbear App
 
 -- this config must be before requires
