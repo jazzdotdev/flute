@@ -4,7 +4,7 @@ function keys.get_profile_data ()
   local uuid, name = keys.get_profile()
   log.debug("UUID: " .. tostring(uuid))
 
-  data.sign_public_key = content.walk_documents(uuid,
+  data.sign_public_key = contentdb.walk_documents(uuid,
     function (file_uuid, header, body)
       if header.model == "key"
       and header.kind == "sign_private"
@@ -12,7 +12,7 @@ function keys.get_profile_data ()
     end
   )
 
-  data.place = content.walk_documents(uuid,
+  data.place = contentdb.walk_documents(uuid,
     function (file_uuid, header, body)
       if header.model == "place" then
         return header.host

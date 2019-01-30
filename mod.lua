@@ -1,3 +1,4 @@
+
 _G.log = require "third-party.log"
 -- _G.inspect = require "third-party.inspect"
 _G.luvent = require "third-party.Luvent"
@@ -13,6 +14,8 @@ require "third-party.get_all_files"
 require "third-party.read_file"
 require "third-party.read_lines"
 require "third-party.path_separator"
+require "third-party.join"
+require "third-party.sanitize"
 _G.contentdb = require "contentdb.mod"
 _G.keys = require "keys.mod"
 require "loaders.package"

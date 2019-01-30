@@ -4,7 +4,7 @@ function keys.witness_document (document_id)
   local profile_uuid = get_profile()
   if not profile_uuid then return nil, "Profile not found" end
   
-  local fields, body, store = content.read_document(document_id)
+  local fields, body, store = contentdb.read_document(document_id)
   if not fields then return nil, "Document not found" end
   
   local priv_key = keys.get_private_key()
@@ -32,7 +32,7 @@ function keys.witness_document (document_id)
     signature = signature
   }
   
-  content.write_file("home", witness_id, witness_fields, "")
+  contentdb.write_file("home", witness_id, witness_fields, "")
   
   return witness_id
   end

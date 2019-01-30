@@ -2,30 +2,30 @@ log.trace("[loading] libraries")
 
 lua_math.randomseed(os.time())
 
-tera.instance = tera.new(torchbear.settings.templates_path or "templates/**/*")
+tera.instance = tera.new(_G.templates)
 
 log.level = torchbear.settings.log_level or "info"
 
-fs.create_dir("log")
-log.outfile = "log/lighttouch"
+fs.create_dir(_G.log_dir)
+log.outfile = _G.log_dir.."/lighttouch"
 
 -- Get home-store uuid
-local home_store = fs.read_file("home-store.txt")
+local home_store = fs.read_file(_G.home_store)
 if not home_store then
   home_store = uuid.v4()
   log.info("No home content store found. Creating new one with uuid " .. home_store)
-  local file = io.open("home-store.txt", "w")
+  local file = io.open(_G.home_store, "w")
   if not file then
     log.error("Could not open home-store.txt")
   end
   file:write(home_store)
   file:close()
-  fs.create_dir("content/" .. home_store, true)
+  fs.create_dir(_G.content .. home_store, true)
 end
 contentdb.home = home_store
 
 if torchbear.settings.theme then
-  theme_loader.load_themes("themes/", torchbear.settings.theme)
+  theme_loader.load_themes(_G.themes_dir, _G.main_theme)
 end
 
 local incoming_request_event = events["incoming_request_received"]

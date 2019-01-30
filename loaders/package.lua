@@ -1,7 +1,7 @@
 -- Foreach package in packages path, get a list of every component from 
 -- events.txt, disabled_actions.txt, rules/, and actions/
 -- then run each loader
-_G.packages_path = "packages" -- directory where packages are stored
+_G.packages_path = fs.sanitize(_G.app_path.."/packages/") -- directory where packages are stored
 -- Split packages path to more easily determine current package name
 local packages_path_modules = _G.packages_path:split( "/" )
 -- Count packages so to process the loop in the correct number of iterations?
@@ -9,7 +9,7 @@ local packages_path_length = #packages_path_modules
 -- Add the packages to the Lua search path, so that each package's components
 -- can be required using its name as if it was a Lua module, eg:
 -- require "lighttouch-libs.actions.create_key"
-package.path = package.path..";./packages/?.lua"
+package.path = package.path.. packages_path .. "?.lua"
 
 -- Foreach event, get its associated actions and the parameters needed for its actions
 _G.events = { } -- events table

@@ -1,5 +1,5 @@
 function keys.get_private_key ()
-  local priv_key = content.walk_documents(content.home,
+  local priv_key = contentdb.walk_documents(contentdb.home,
     function (file_uuid, header, body)
       if header.model == "key"
         and header.kind == "sign_private"
