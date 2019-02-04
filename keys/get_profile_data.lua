@@ -20,5 +20,9 @@ function keys.get_profile_data ()
     end
   )
 
+  if not data.place then
+    data.place = "http://" .. (torchbear.settings.address or "localhost") .. ":" .. (torchbear.settings.port or "3000")
+  end
+
   return data
 end
