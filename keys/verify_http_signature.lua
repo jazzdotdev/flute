@@ -19,7 +19,7 @@ function keys.verify_http_signature (message)
   log.debug("keyId " .. keyId)
   log.debug("signature" .. signature)
 
-  local pub_key = content.walk_documents(keyId,
+  local pub_key = contentdb.walk_documents(keyId,
     function (file_uuid, header, body)
       if header.model == "key" and header.kind == "sign_public" then
       return body

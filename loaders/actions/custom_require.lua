@@ -1,8 +1,8 @@
 function actions_loader.custom_require(name)
     if string.match( name, "actions") then
       package.preload[name] = function(modulename)
-        local created_file = io.open("module.lua", "w+")
-        local modulepath = string.gsub(modulename, "%.", "/")
+	local created_file = io.open("module.lua", "w+")
+	local modulepath = _G.app_path .. string.gsub(modulename, "%.", "/")
         local path = "/"
         local filename = string.gsub(path, "%?", modulepath)
         local file = io.open(filename, "rb")

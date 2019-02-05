@@ -1,9 +1,12 @@
+#!/usr/bin/env torchbear
 -- Lighttouch · Torchbear App
+
+require "config"
 
 -- this config must be before requires
 local address = torchbear.settings.address or "localhost"
 local port = torchbear.settings.port or "3000"
-package.path = package.path..";lighttouch-base/?.lua;"
+package.path = package.path..";" .. _G.app_path.."?.lua;"
 --
 
 require "mod"
