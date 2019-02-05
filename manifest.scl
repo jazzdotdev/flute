@@ -9,8 +9,9 @@ imports = {
 	luvent = "third-party/",
 	valua = "third-party/",
 	torchbear-libs = "third-party/",
-	contentdb-lua = "contentdb",
+	contentdb-lua = "contentdb/",
 	torchbear-libs-dev = "third-party/",
+	lighttouch-default-content = "content/",
 }
 
 torchbear-libs = {
@@ -62,4 +63,8 @@ send-file-package = {
 
 lighttouch-change-management = {
 	url = "https://github.com/foundpatterns/lighttouch-change-management",
+}
+
+lighttouch-default-content = {
+	url = "https://github.com/foundpatterns/lighttouch-default-content",
 }
