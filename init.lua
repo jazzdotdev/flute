@@ -1,17 +1,19 @@
 #!/usr/bin/env torchbear
 -- Lighttouch · Torchbear App
 
+_G.cwd = fs.canonicalize(env.current_dir()) .. "/"
+
 require "config"
 
 -- this config must be before requires
-local address = torchbear.settings.address or "localhost"
-local port = torchbear.settings.port or "3000"
-package.path = package.path..";" .. _G.cwd.."?.lua;"
+package.path = package.path ..";" .. cwd .. "?.lua;"
 --
 
 require "mod"
 require "base"
 
+local address = torchbear.settings.address or "localhost"
+local port = torchbear.settings.port or "3000"
 log.info("[starting] web server on " .. address .. ":" .. port)
 
 -- Handler function
