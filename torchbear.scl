@@ -3,13 +3,3 @@ web-server = {
     port = "3000",
     single_actor = true,
 }
-
-general = {
-    init = "lighttouch-base/init.lua",
-    theme = "base-theme",
-    log_level = "trace",
-    sitename = "Lighttouch",
-    slideshow = "c800a360-d198-4a87-877e-b353f7dd0a9d",
-    user = "admin",
-    password = "admin",
-}

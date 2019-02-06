@@ -1,7 +1,7 @@
-function themes_loader.load_themes (themes_dir, main_theme, callback)
-  themes_loader.main = main_theme
+function themes_loader.load_themes (themes_dir, theme, callback)
+  themes_loader.theme = theme
   themes_loader.dir = themes_dir
-  themes_loader.load_theme(main_theme)
+  themes_loader.load_theme(theme)
 
   for _, fn in ipairs(themes_loader.preprocessors) do
     fn(themes)

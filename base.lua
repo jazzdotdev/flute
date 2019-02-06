@@ -2,9 +2,7 @@ log.trace("[loading] libraries")
 
 lua_math.randomseed(os.time())
 
-tera.instance = tera.new(_G.templates)
-
-log.level = torchbear.settings.log_level or "info"
+log.level = lighttouch.settings.log_level or "info"
 
 fs.create_dir(_G.log_dir)
 log.outfile = _G.log_dir.."/lighttouch"
@@ -25,7 +23,7 @@ end
 contentdb.home = home_store
 
 if torchbear.settings.theme then
-  theme_loader.load_themes(_G.themes_dir, _G.main_theme)
+  theme_loader.load_themes(_G.themes_dir, _G.theme)
 end
 
 local incoming_request_event = events["incoming_request_received"]
