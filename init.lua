@@ -12,8 +12,8 @@ package.path = package.path ..";" .. cwd .. "?.lua;"
 require "mod"
 require "base"
 
-local address = torchbear.settings.address or "localhost"
-local port = torchbear.settings.port or "3000"
+local address = torchbear.settings and torchbear.settings.address or "localhost"
+local port = torchbear.settings and torchbear.settings.port or "3000"
 log.info("[starting] web server on " .. address .. ":" .. port)
 
 -- Handler function

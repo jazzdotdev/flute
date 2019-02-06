@@ -2,7 +2,7 @@ log.trace("[loading] libraries")
 
 lua_math.randomseed(os.time())
 
-log.level = lighttouch.settings.log_level or "info"
+log.level = settings.log_level or "info"
 
 fs.create_dir(_G.log_dir)
 log.outfile = _G.log_dir.."/lighttouch"
@@ -22,7 +22,7 @@ if not home_store then
 end
 contentdb.home = home_store
 
-if torchbear.settings.theme then
+if settings.theme then
   theme_loader.load_themes(_G.themes_dir, _G.theme)
 end
 
