@@ -1,5 +1,5 @@
 -- config
-_G.app_path = fs.canonicalize(arg[1]:match(".+/") or ".").. "/"
+_G.app_path = fs.canonicalize(env.current_dir()) .. "/"
 _G.db_path = app_path.."/contentdb/"
 _G.templates = app_path..(torchbear.settings.templates_path or "templates/**/*")
 _G.log_dir = app_path.."log"
