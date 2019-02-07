@@ -7,7 +7,7 @@ if not content then
   os.exit(1)
 end
 
-_G.settings = scl.to_table(content)
+_G.settings = scl.to_table(content).settings
 
 _G.app_path = cwd
 _G.db_path = cwd.."/contentdb/"

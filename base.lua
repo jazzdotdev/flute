@@ -2,6 +2,8 @@ log.trace("[loading] libraries")
 
 lua_math.randomseed(os.time())
 
+tera.instance = tera.new(settings.templates_path or "templates/**/*")
+
 log.level = settings.log_level or "info"
 
 fs.create_dir(_G.log_dir)
@@ -23,7 +25,7 @@ end
 contentdb.home = home_store
 
 if settings.theme then
-  theme_loader.load_themes(_G.themes_dir, _G.theme)
+  theme_loader.load_themes(_G.themes_dir, settings.theme)
 end
 
 local incoming_request_event = events["incoming_request_received"]

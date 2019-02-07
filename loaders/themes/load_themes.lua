@@ -1,4 +1,4 @@
-function themes_loader.load_themes (themes_dir, theme, callback)
+function themes_loader.load_themes (themes_dir, theme)
   themes_loader.theme = theme
   themes_loader.dir = themes_dir
   themes_loader.load_theme(theme)

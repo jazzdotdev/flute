@@ -1,5 +1,5 @@
-themes = {}
-themes_loader = {
+_G.themes = {}
+_G.themes_loader = {
   preprocessors = {}
 }
 
