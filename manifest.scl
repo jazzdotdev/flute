@@ -1,17 +1,9 @@
 imports = {
-	lighttouch-logging = "packages/lighttouch-logging",
-	lighttouch-json-interface = "packages/lighttouch-json-interface",
-	lighttouch-html-interface = "packages/lighttouch-html-interface",
-	homepage-package = "packages/homepage-package",
-	base-theme = "themes/base-theme",
-	send-file-package = "packages/send-file-package",
-	lighttouch-change-management = "packages/lighttouch-change-management",
 	luvent = "third-party/",
 	valua = "third-party/",
 	torchbear-libs = "third-party/",
 	contentdb-lua = "contentdb/",
 	torchbear-libs-dev = "third-party/",
-	lighttouch-default-content = "content/",
 }
 
 torchbear-libs = {
@@ -35,36 +27,4 @@ valua = {
 
 contentdb-lua = {
 	url = "https://github.com/foundpatterns/contentdb-lua",
-}
-
-lighttouch-logging = {
-	url = "https://github.com/foundpatterns/lighttouch-logging",
-}
-
-lighttouch-json-interface = {
-	url = "https://github.com/foundpatterns/lighttouch-json-interface",
-}
-
-lighttouch-html-interface = {
-	url = "https://github.com/foundpatterns/lighttouch-html-interface",
-}
-
-homepage-package = {
-	url = "https://github.com/foundpatterns/homepage-package",
-}
-
-base-theme = {
-	url = "https://github.com/foundpatterns/base-theme",
-}
-
-send-file-package = {
-	url = "https://github.com/foundpatterns/send-file-package",
-}
-
-lighttouch-change-management = {
-	url = "https://github.com/foundpatterns/lighttouch-change-management",
-}
-
-lighttouch-default-content = {
-	url = "https://github.com/foundpatterns/lighttouch-default-content",
 }
