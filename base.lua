@@ -24,6 +24,8 @@ if not home_store then
 end
 contentdb.home = home_store
 
+contentdb.scan_stores()
+
 if settings.theme then
   theme_loader.load_themes(_G.themes_dir, settings.theme)
 end
