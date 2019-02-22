@@ -9,6 +9,34 @@ require "config"
 package.path = package.path ..";" .. cwd .. "?.lua;"
 --
 
+-- TODO: refactor out into a library (and make it prettier)
+local _req = require
+function require (module_name)
+
+  local is_new = package.loaded[module_name] == nil
+  
+  local mod = _req(module_name)
+
+  if is_new and type(mod) == "function" then
+    log.debug("Patched module function " .. module_name)
+    local _mod = mod
+    function mod (...)
+      local args_str = table.concat({...}, ", ")
+      log.trace("[function] " .. module_name .. "(" .. args_str .. ")")
+
+      local function fn (...) return {...} end
+      local result = fn(_mod(...))
+
+      local rets_str = table.concat({rets_tbl}, ", ")
+      log.trace("[function] " .. module_name .. " returned " .. rets_str)
+      return table.unpack(result)
+    end
+    package.loaded[module_name] = mod
+  end
+
+  return mod
+end
+
 require "mod"
 require "base"
 
