@@ -1,10 +1,5 @@
 <p align="center"><img width="100" src="https://i.imgur.com/zwjfmrF.png" alt="lighttouch logo"><br>This Project is Currently in Stealth Mode.<br>please do not post a news story until v0.1 is released very shortly.<br>thank you.</p>
 
-<p align="center">
-  <a href="https://github.com/foundpatterns/lighttouch/issues"><img src="https://img.shields.io/badge/contributions-welcome-brightgreen.svg?style=" alt="Contributions Welcome"></a>
-  <a href="https://discord.gg/b6MY7dG"><img src="https://img.shields.io/badge/chat-on%20discord-7289da.svg" alt="Chat"></a>
-</p>
-
 Lighttouch is a framework that makes complex application development simpler.  It does this through broad use of [component-oriented design](https://en.wikipedia.org/wiki/Component-based_software_engineering) intended to offer programmers a well-researched alternative to starting with a blank canvas - "put your code anywhere".
 
 [Code organized](https://en.wikipedia.org/wiki/Structured_programming) this way is:
