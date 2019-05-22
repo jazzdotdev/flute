@@ -15,7 +15,8 @@ function themes_loader.resolve_template (theme, path)
   end
 
   -- Search in parents anyway
-  for _, parent_name in ipairs(theme.info.parents) do
+  local parents = theme.info.parents or {}
+  for _, parent_name in ipairs(parents) do
     local parent_theme = themes[parent_name]
 
     -- If file exists in theme, return it
