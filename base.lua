@@ -33,7 +33,7 @@ end
 local incoming_request_event = events["incoming_request_received"]
 local function request_process_action (arguments)
   local request_uuid = uuid.v4()
-  log.info("\tNew request received: " .. request_uuid)
+  log.debug("\tNew request received: " .. request_uuid)
   
   local request = arguments.request
   request.path_segments = request.path:split("/")
@@ -47,7 +47,7 @@ local function response_process_action (arguments)
   local response = arguments.response
   local response_uuid = uuid.v4()
   response.uuid = response_uuid
-  log.info("\tSending response: " .. response_uuid)
+  log.debug("\tSending response: " .. response_uuid)
 end
 outgoing_response_event:addAction(response_process_action)
 outgoing_response_event:setActionPriority(response_process_action, 100)
