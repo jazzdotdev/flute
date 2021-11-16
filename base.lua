@@ -4,7 +4,7 @@ lua_math.randomseed(os.time())
 
 tera.instance = tera.new(settings.templates_path or "templates/**/*")
 
-log.level = settings.log_level or "info"
+-- log.level = settings.log_level or "info"
 
 fs.create_dir(_G.log_dir)
 log.outfile = _G.log_dir.."/lighttouch"

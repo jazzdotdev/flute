@@ -5,6 +5,9 @@ _G.cwd = fs.canonicalize(env.current_dir()) .. "/"
 
 require "config"
 
+_G.log = require "third-party.log"
+log.level = settings.log_level or "info"
+
 -- this config must be before requires
 package.path = package.path ..";" .. cwd .. "?.lua;"
 --

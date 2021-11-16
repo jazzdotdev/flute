@@ -1,5 +1,5 @@
 
-_G.log = require "third-party.log"
+-- _G.log = require "third-party.log"
 _G.inspect = require "third-party.inspect"
 _G.luvent = require "third-party.Luvent"
 require "third-party.base64"
