@@ -1,5 +1,5 @@
-#!/usr/bin/env torchbear
--- Lighttouch · Torchbear App
+#!/usr/bin/env jazz
+-- Lighttouch · Jazz App
 
 _G.cwd = fs.canonicalize(env.current_dir()) .. "/"
 
