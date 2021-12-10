@@ -1,5 +1,5 @@
 #!/usr/bin/env jazz
--- Lighttouch · Jazz App
+-- Jazz Flute
 
 _G.cwd = fs.canonicalize(env.current_dir()) .. "/"
 
